@@ -2,5 +2,7 @@
 ### Interaction and Information Design – Course Project
 
 **Data available at:**
+- [Prihodi in prenočitve turistov po državah, občine, Slovenija, mesečno](https://pxweb.stat.si/SiStatData/pxweb/sl/Data/-/2164466S.px)
+- [Prihodi in prenočitve domačih in tujih turistov po skupinah nastanitvenih obratov, statistične regije, Slovenija, mesečno](https://pxweb.stat.si/SiStatData/pxweb/sl/Data/-/2164439S.px)
 - [GURS RPE GitHub Repository](https://github.com/stefanb/gurs-rpe)
-- [Statistical Office of the Republic of Slovenia (SURS) - Slovenske statistične regije in občine](https://www.stat.si/obcine)
+- [SURS - Slovenske statistične regije in občine](https://www.stat.si/obcine)
