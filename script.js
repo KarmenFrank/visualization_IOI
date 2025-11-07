@@ -1,4 +1,10 @@
 
+// Constant values
+const INITIAL_VIEW = {
+  center: [46.15, 14.995],
+  zoom: 8.5
+};
+
 // Global variables:
 let map;
 let geoLayer = null;
@@ -12,8 +18,8 @@ let selectedFeature = null; // to know which region is selected
 // Initialize the map for Slovenia:
 function initMap() {
   map = L.map("map", {
-    center: [46.15, 14.995],
-    zoom: 8,
+    center: INITIAL_VIEW.center,
+    zoom: INITIAL_VIEW.zoom,
     minZoom: 9,
     maxZoom: 12,
     zoomControl: true
@@ -46,8 +52,29 @@ function drawAreas(data) {
         selectedFeature = feature;
         map.fitBounds(layer.getBounds(), {padding: [50, 50], maxZoom: 10});
 
-        const name = feature.properties.OB_UIME || feature.properties.SR_UIME;
-        layer.bindPopup(`<b>${name}</b>`).openPopup();
+        const obcinaName = feature.properties.OB_UIME || "";
+        const regijaName = feature.properties.SR_UIME;
+
+        let popupHtml = ""
+
+        // municipalities
+        if(isMunicipalityView) {
+          popupHtml = `
+            <div>
+              <b>${obcinaName}</b>
+              <br><span>${regijaName}</span>
+            </div>
+          `;
+        } else {
+          // statistical regions
+          popupHtml = `
+            <div>
+              <b>${regijaName}</b>
+            </div>
+          `;
+        }
+
+        layer.bindPopup(`<b>${popupHtml}</b>`).openPopup();
 
         // Highlight selected area:
         layer.setStyle({
@@ -59,6 +86,12 @@ function drawAreas(data) {
       // After leaving region, reset style:
       layer.on("popupclose", () => {
         geoLayer.resetStyle(layer);
+
+        //return to original view
+        map.flyTo(INITIAL_VIEW.center, INITIAL_VIEW.zoom, {
+          animate: true,
+          duration: 0.2
+        });
       });
     }
   });
@@ -70,7 +103,7 @@ function drawAreas(data) {
 // Load GeoJSON data:
 async function loadData() {
   const [munResponse, regResponse] = await Promise.all([
-    fetch("data/OB.geojson"),
+    fetch("data/OB_with_SR.geojson"),
     fetch("data/SR.geojson")
   ]);
 
