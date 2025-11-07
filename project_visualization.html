@@ -8,7 +8,8 @@
   <link rel="stylesheet" href="style.css">
 
   <!-- Leaflet -->
-   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-image/leaflet-image.js"></script>
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -30,7 +31,12 @@
   </main>
 
   <button id="toggle-btn">Switch View</button>
-  <div id="map"></div>
+  
+  <div id="map-wrapper">
+    <div id="map"></div>
+    <svg id="focus-overlay"></svg>
+  </div>
+
 
   <script src="script.js"></script>
   
