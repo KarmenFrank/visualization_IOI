@@ -6,6 +6,13 @@
   <title>Spatiotemporal Visualization</title>
 
   <link rel="stylesheet" href="style.css">
+
+  <!-- Leaflet -->
+   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
 </head>
 <body>
   <header>
@@ -22,9 +29,8 @@
     </section>
   </main>
 
-  <footer>
-    <p>© 2025 Interaction and Information Design – University Project</p>
-  </footer>
+  <button id="toggle-btn">Switch View</button>
+  <div id="map"></div>
 
   <script src="script.js"></script>
   
