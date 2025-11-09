@@ -4,7 +4,7 @@ const CONFIG = {
   MAP_STYLE: { background: "#8bd8ddff" },
   AREA_STYLE: { color: "#555", weight: 1, fillColor: "#e0e0e0", fillOpacity: 1.0 },
   FOCUSED_STYLE: { color: "#000", weight: 2, fillColor: "#fff", fillOpacity: 1.0 },
-  BLUR_EFFECT: { blur: "40px", brightness: 0.8, duration: 0.3 },
+  BLUR_EFFECT: { blur: "20px", brightness: 0.9, duration: 0.3 },
   ENLARGE_EFFECT: {
     targetWidthRatio: 0.6,
     targetHeightRatio: 0.6,
