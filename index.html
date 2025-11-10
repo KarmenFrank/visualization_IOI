@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Spatiotemporal Visualization</title>
 
-  <link rel="stylesheet" href="style.css">
-  <script src="./js/data_processing.js"></script>
+  <link rel="stylesheet" href="style/website.css">
+  <link rel="stylesheet" href="style/map.css">
+  <link rel="stylesheet" href="style/timeline.css">
 
-  <!-- Leaflet -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet-image/leaflet-image.js"></script>
   <link
@@ -24,9 +24,9 @@
 
   <button id="toggle-btn">Switch View</button>
   
-  <div id="map-wrapper">
+  <div id="map-container">
     <div id="map"></div>
-    <svg id="focus-overlay"></svg>
+    <svg id="focused-area"></svg>
   </div>
 
 
@@ -41,7 +41,7 @@
 
 
 
-  <script src="./js/visualization_render.js"></script>
+  <script type="module" src="./js/main.js"></script>
   
 </body>
 </html>
