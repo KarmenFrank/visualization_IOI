@@ -22,7 +22,8 @@ export const state = {
     timeline: null,
     label: null,
     playButton: null,
-    speedSlider: null
+    speedSlider: null,
+    speedLabel: null
   },
 
   
