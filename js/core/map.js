@@ -44,6 +44,7 @@ export function updateMapShape() {
   state.geoLayer = L.geoJSON(data, {
     style: CONFIG.AREA_STYLE,
     onEachFeature: (feature, layer) => {
+
       layer.on("click", (e) => {
         e.originalEvent.stopPropagation();
         if (state.clickLocked) return;
@@ -124,8 +125,6 @@ export function unblurMap() {
 
 //switch between municipality and statistical area view
 function toggleView() {
-  if (state.clickLocked) return;
-
   state.isMunicipalityView = !state.isMunicipalityView;
 
   unfocusArea();
@@ -133,6 +132,39 @@ function toggleView() {
   updateMapColors();
 
 }
+
+
+
+
+
+
+export function selectByID(){
+  const { selectedArea, municipalityData, regionData, isMunicipalityView, searchSelect } = state;
+
+  const searched_is_municipality = searchSelect.region == null ? true : false;
+  const id = searched_is_municipality ? searchSelect.municipality : searchSelect.region;
+
+  if (selectedArea) unfocusArea();
+  if (searched_is_municipality != isMunicipalityView) toggleView();
+
+  const data = searched_is_municipality ? municipalityData : regionData;
+
+  data.features.forEach(feature => {
+    const ob_ime = feature.properties.OB_UIME;
+    const sr_ime = feature.properties.SR_UIME;
+
+    if ((searched_is_municipality && ob_ime === id) || (!searched_is_municipality && sr_ime === id)){      
+      return handleAreaClick(feature);
+    }
+
+  });
+  
+}
+
+
+
+
+
 
 //handler for clicking on municipalities/statistical areas
 function handleAreaClick(feature) {

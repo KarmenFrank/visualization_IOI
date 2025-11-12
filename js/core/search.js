@@ -1,12 +1,7 @@
 import { state } from './state.js';
+import { selectByID } from './map.js';
 
 // For storing the search selection:
-let searchSelect = {
-  region: null,
-  municipality: null,
-  town: null
-};
-
 
 let towns = [];
 let municipalities = [];
@@ -51,10 +46,10 @@ function handleInput() {
     // Show municipality and region confirmation for town and municipality:
     let record = null;
 
-    if (searchSelect.town) {
-      record = state.searchData.find(d => d.town_name === searchSelect.town);
-    } else if (searchSelect.municipality) {
-      record = state.searchData.find(d => d.mun_name === searchSelect.municipality);
+    if (state.searchSelect.town) {
+      record = state.searchData.find(d => d.town_name === state.searchSelect.town);
+    } else if (state.searchSelect.municipality) {
+      record = state.searchData.find(d => d.mun_name === state.searchSelect.municipality);
     }
 
     if (!record) return;
@@ -89,40 +84,43 @@ function showSuggestions(items, type) {
 }
 
 /**
- * When a suggestion is clicked, update searchSelect
+ * When a suggestion is clicked, update state.searchSelect
  * @param {string} name
  * @param {string} type
  */
 function selectSuggestion(name, type) {
+
   suggestionsList.innerHTML = '';
   searchInput.value = name;
-
+  
   if (type === 'town') {
-    searchSelect = { town: name, municipality: null, region: null };
+    state.searchSelect = { town: name, municipality: null, region: null };
     step = 2;
     handleInput();
   } else if (type === 'municipality') {
-    searchSelect = { town: null, municipality: name, region: null };
+    state.searchSelect = { town: null, municipality: name, region: null };
     step = 2;
     handleInput();
   } else if (type === 'region') {
-    searchSelect = { town: null, municipality: null, region: name };
+    state.searchSelect = { town: null, municipality: null, region: name };
     step = 1;
-    console.log('Final selection:', searchSelect);
+    console.log('Final selection:', state.searchSelect);
     // Trigger visualization
   } else if (type === 'confirm') {
     const mun = name.startsWith('Municipality: ') ? name.replace('Municipality: ', '') : null;
     const reg = name.startsWith('Region: ') ? name.replace('Region: ', '') : null;
 
-    if (mun) searchSelect.municipality = mun;
-    if (reg) searchSelect.region = reg;
+    if (mun) state.searchSelect.municipality = mun;
+    if (reg) state.searchSelect.region = reg;
 
     // Reset step
     step = 1;
-    console.log('Final selection:', searchSelect);
+    console.log('Final selection:', state.searchSelect);
 
     // Trigger your visualization update here
-    // updateMap(searchSelect.municipality, searchSelect.region);
+    // updateMap(state.searchSelect.municipality, state.searchSelect.region);
+    selectByID();
+
   }
 }
 
@@ -130,5 +128,5 @@ function selectSuggestion(name, type) {
 export function clearSearch() {
   searchInput.value = '';
   suggestionsList.innerHTML = '';
-  searchSelect = { region: null, municipality: null, town: null };
+  state.searchSelect = { region: null, municipality: null, town: null };
 }

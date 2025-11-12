@@ -8,6 +8,11 @@ export const state = {
   months: [],
 
   searchData: null,
+  searchSelect : {
+    region: null,
+    municipality: null,
+    town: null
+  },
 
   isMunicipalityView: true,
   selectedArea: null,
