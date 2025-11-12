@@ -16,3 +16,9 @@ export async function loadMapData() {
     state.municipalityData = await munRes.json();
     state.regionData = await regRes.json();
 }
+
+
+export async function loadSearchData() {
+  const response = await fetch("data/regije_obcine_naselja.json");
+  state.searchData = await response.json();
+}

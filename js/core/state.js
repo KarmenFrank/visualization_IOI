@@ -7,6 +7,8 @@ export const state = {
   touristData: [],
   months: [],
 
+  searchData: null,
+
   isMunicipalityView: true,
   selectedArea: null,
   clickLocked: false,

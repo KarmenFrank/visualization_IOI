@@ -1,0 +1,38 @@
+#searchBar {
+  width: 400px;
+  padding: 2px 5px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+
+.suggestions-list {
+  position: absolute;       /* Dropdown menu under input*/
+  background-color: #fff;
+  border: 1px solid #ccc;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  max-height: 200px;
+  overflow-y: auto;         /* Scroll if too tall */
+  z-index: 9999;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 300px;
+}
+
+/* Each suggestion item */
+.suggestion-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+/* Hover/focus effect */
+.suggestion-item:hover {
+  background-color: #f0f0f0;
+}
+
+/* Optional: make selected item highlighted */
+.suggestion-item.active {
+  background-color: #e0e0ff;
+}
