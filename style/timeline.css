@@ -63,6 +63,7 @@
   position: relative;
   top: 50%;
   transform: translateY(-50%); /* center vertically */
+  z-index: 10;
 }
 
 /* Thumb (Firefox) */
@@ -75,6 +76,7 @@
   box-shadow: 0 0 2px rgba(0,0,0,0.5);
   transition: transform 0.15s ease;
   transform: translateY(-3px);
+  z-index: 10;
 }
 
 /* Hover: add scale without overriding translate */
@@ -105,6 +107,7 @@
   width: calc((100% / (var(--tick-count) - 1)) * var(--tick-count));
   box-sizing: border-box;
   position: relative;
+  z-index: 5;
 }
 
 .timeline-tick:last-child {

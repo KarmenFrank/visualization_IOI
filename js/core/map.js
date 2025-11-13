@@ -1,5 +1,5 @@
 import { state } from './state.js';
-import { normalizeAreaName, lerpColor } from './common.js';
+import { normalizeAreaName, calcAreaColor } from './common.js';
 
 
 export function initMap() {
@@ -82,10 +82,7 @@ export function updateMapColors() {
     const entry = municipalities[name];
 
     if (entry) {
-      const total = entry.countries.reduce((sum, c) => sum + (c.data.data || 0), 0);
-      const linear_interpolant = Math.min(total / 20000, 1.0);
-      const fill = lerpColor(CONFIG.TOURIST_COLORS.low_color, CONFIG.TOURIST_COLORS.high_color, linear_interpolant);
-      layer.setStyle({ fillColor: fill });
+      layer.setStyle({ fillColor: calcAreaColor(entry) });
     } else {
       layer.setStyle({ fillColor: CONFIG.TOURIST_COLORS.error_color });
     }

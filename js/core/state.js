@@ -45,8 +45,14 @@ export const state = {
       easing: "ease"
     },
     TOURIST_COLORS: {
-      low_color: "#41e786ff",
-      high_color: "#d16135ff",
+      MIN_VALUE : 0,
+      MAX_VALUE : 1_00_000,
+      low_color: "#95f1bbff",
+      mid_color : "#ffffffff",
+      high_color: "#e64934ff",
+
+
+
       error_color: "#ff0000ff"
     },
     LOADING_EFFECT: {
