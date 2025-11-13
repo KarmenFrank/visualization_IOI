@@ -1,5 +1,6 @@
 import { state } from './state.js';
 import { normalizeAreaName, calcAreaColor } from './common.js';
+import { clearSearch } from './search.js';
 
 
 export function initMap() {
@@ -178,7 +179,7 @@ function handleAreaClick(feature) {
 }
 
 //clicking off the focused area
-function unfocusArea() {
+export function unfocusArea() {
   const { CONFIG } = state;
   if (!state.selectedArea) return;
 
@@ -188,6 +189,7 @@ function unfocusArea() {
   const overlay = document.getElementById("focused-area");
   overlay.innerHTML = "";
   state.selectedArea = null;
+  clearSearch()
 
   setTimeout(() => (state.clickLocked = false), CONFIG.BLUR_EFFECT.duration * 1000);
 }
