@@ -1,0 +1,8 @@
+#main-layout {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px; /* space between map and graph */
+    width: 100%;
+}
