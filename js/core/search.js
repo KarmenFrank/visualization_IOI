@@ -11,6 +11,9 @@ export function initSearch() {
   state.towns = [...new Set(state.searchData.map(d => d.town_name))];
   state.townSet = new Set(state.towns.map(t => t.toLowerCase()));
   state.municipalities = [...new Set(state.searchData.map(d => d.mun_name))];
+  state.municipalitiesFiltered = state.municipalities.filter(
+    m => !state.townSet.has(m.toLowerCase())
+  );
   state.regions = [...new Set(state.searchData.map(d => d.stat_region_name))];
 
   state.searchInput.addEventListener('input', handleInput);
@@ -39,12 +42,7 @@ function handleInput() {
   if (state.step === 1) {
     const townMatches = rankedMatches(state.towns, query, 'town');
 
-    // const munMatches = state.municipalities.filter(m => m.toLowerCase().includes(query) && !state.townSet.has(m.toLowerCase())).map(n => ({ name: n, type: 'municipality' }));
-    const munMatches = rankedMatches(
-      state.municipalities.filter(m => !state.townSet.has(m.toLowerCase())), //TODO: vnaprej zračunaj
-      query,
-      'municipality'
-    );
+    const munMatches = rankedMatches(state.municipalitiesFiltered, query, 'municipality');
 
     const regMatches = rankedMatches(state.regions, query, 'region');
 

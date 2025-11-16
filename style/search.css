@@ -3,10 +3,12 @@
   align-items: center;
   gap: 10px;
   position: relative;
-  z-index: 10;
-  padding: 6px;
+  z-index: 9999;
+  padding: 10px 4px 10px 4px;
 }
 
+
+/*----- SWITCH VIEW BUTTON -----*/
 #toggle-btn {
   background: #dddddd;
   border: none;
@@ -26,19 +28,19 @@
 }
 
 
+/*----- SEARCH -----*/
 #searchContainer {
-  position: relative;
   display: flex;
   align-items: center;
   gap: 4px;
-  flex: 1 1 auto;
+  flex-basis: 400px;
+  /* flex: 1 1 auto; */
 }
 
-#search {
-  position: relative;  /* container for input + suggestions */
+#search { /* container for input + suggestions */
   display: flex;
   flex-direction: column; /* stack input and dropdown */
-  width: 100%;
+  flex-basis: 100%;
   max-width: 400px;
   min-width: 200px;
 }
@@ -116,4 +118,79 @@
 
 #clearSearchBtn:hover {
   background: #acacac;
+}
+
+
+/*----- FILTER -----*/
+#filterContainer {
+  position: relative;
+  flex-shrink: 0;
+}
+
+#filterBtn {
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 6px 8px 6px 32px;
+  height: 32px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  color: #000;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  background: #fff url('Filter.png') no-repeat 8px center;
+  background-size: 16px 16px;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+#filterBtn:hover {
+  background-color: #f0f0f0;
+  border-color: #aaa;
+}
+
+#filterDropdown {
+  position: absolute;
+  top: 100%; /* directly under button */
+  right: 0;
+  width: 220px;
+  max-height: 260px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #dddddd;
+  border-radius: 0 0 8px 8px;
+  padding: 6px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  z-index: 9999;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+}
+
+#filterDropdown.hidden {
+  display: none;
+}
+
+.filter-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.filter-row:hover {
+  background-color: #dddddd;
+}
+
+.select-all-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0 4px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #ccc; /* gray line */
+  margin-bottom: 4px;
 }

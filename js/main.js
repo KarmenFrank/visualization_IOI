@@ -1,7 +1,8 @@
-import {loadMapData, loadSearchData, loadTouristData} from './core/data.js'
+import { loadMapData, loadSearchData, loadTouristData } from './core/data.js'
 import { initMap, updateMapShape, updateMapColors, blurMap, unblurMap, selectByID } from './core/map.js';
 import { populateTimelineWithMonths } from './core/timeline.js';
-import {initSearch} from './core/search.js';
+import { initSearch } from './core/search.js';
+import { initFilter } from './core/filter.js';
 import { initGraph, setGraphData } from './core/graph.js';
 import { state } from './core/state.js';
 
@@ -21,6 +22,7 @@ async function setupWithLoadingBlur() {
     updateMapColors();
     populateTimelineWithMonths();
     initSearch();
+    initFilter();
     unblurMap();
 
   }

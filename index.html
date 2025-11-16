@@ -25,13 +25,20 @@
 
   <div id="topBar">
     <button id="toggle-btn">Switch View</button>
+
     <div id="searchContainer">
       <div id="search">
         <input type="text" id="searchBar" placeholder="Search for town, municipality, or region..." autocomplete="off"/>
         <ul id="suggestions" class="suggestions-list"></ul>
       </div>
       <button id="clearSearchBtn" title="Clear search">✕</button>
-      
+    </div>
+
+    <div id="filterContainer">
+      <button id="filterBtn">Tourist nationality</button>
+      <div id="filterDropdown" class="hidden">
+        <div id="filterList"></div>
+      </div>
     </div>
   </div>
   

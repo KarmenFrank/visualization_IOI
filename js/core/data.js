@@ -2,7 +2,8 @@ import { state } from './state.js';
 
 
 export async function loadTouristData() {
-  const response = await fetch("data/tourist_data_grouped_smaller.json");
+  // const response = await fetch("data/tourist_data_grouped_smaller.json");
+  const response = await fetch("data/tourist_data_grouped_ENG.json");
   state.touristData = await response.json();
   state.months = state.touristData.map(d => d.month);
 }

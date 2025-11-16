@@ -11,17 +11,21 @@ export const state = {
   towns: [],
   townSet: null,
   municipalities: [],
+  municipalitiesFiltered: [],
   regions: [],
+
   suggestionsList: null,
   searchInput: null,
   clearBtn: null,
   step: 1, // 1 or 2
-
   searchSelect : {
     region: null,
     municipality: null,
     town: null
   },
+
+  allNationalities: [],
+  selectedNationalities: null,
 
   isMunicipalityView: true,
   selectedArea: null,
