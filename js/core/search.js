@@ -14,7 +14,7 @@ export function initSearch() {
   state.regions = [...new Set(state.searchData.map(d => d.stat_region_name))];
 
   state.searchInput.addEventListener('input', handleInput);
-  state.clearBtn.addEventListener('click', unfocusArea);
+  state.clearBtn.addEventListener('click', () => unfocusArea(true));
 }
 
 // Typing in search bar:
@@ -24,19 +24,35 @@ function handleInput() {
 
   if (!query) return;
 
+  // If user modifies input during step 2, return to step 1:
+  if (state.step === 2) {
+    const selectedName =
+      (state.searchSelect.town ?? state.searchSelect.municipality ?? "").toLowerCase();
+
+    if (!query.startsWith(selectedName)) {
+      state.step = 1;
+      state.searchSelect = { town: null, municipality: null, region: null };
+    }
+  }
+
   // Step 1 - search across all three types of areas:
   if (state.step === 1) {
-    const townMatches = state.towns.filter(t => t.toLowerCase().includes(query)).map(n => ({ name: n, type: 'town' }));
+    const townMatches = rankedMatches(state.towns, query, 'town');
 
-    const munMatches = state.municipalities.filter(m => m.toLowerCase().includes(query) && !state.townSet.has(m.toLowerCase())).map(n => ({ name: n, type: 'municipality' }));
+    // const munMatches = state.municipalities.filter(m => m.toLowerCase().includes(query) && !state.townSet.has(m.toLowerCase())).map(n => ({ name: n, type: 'municipality' }));
+    const munMatches = rankedMatches(
+      state.municipalities.filter(m => !state.townSet.has(m.toLowerCase())), //TODO: vnaprej zračunaj
+      query,
+      'municipality'
+    );
 
-    const regMatches = state.regions.filter(r => r.toLowerCase().includes(query)).map(n => ({ name: n, type: 'region' }));
+    const regMatches = rankedMatches(state.regions, query, 'region');
 
     const matches = [...townMatches, ...munMatches, ...regMatches];
     if (matches.length > 0) showSuggestions(matches);
 
   } else if (state.step === 2) {
-    // Show municipality and region confirmation for town and municipality:
+    // Step 2 - how municipality and region confirmation for town and municipality:
     let record = null;
 
     if (state.searchSelect.town) {
@@ -53,12 +69,36 @@ function handleInput() {
   }
 }
 
-/**
- * Show suggestions in a dropdown menu:
- * @param {string[]} items - Matching items
- * @param {string} type - 'town', 'municipality', or 'region'
- */
-function showSuggestions(items, type) {
+// Rank matches, first prefix, then contains:
+function rankedMatches(list, query, type) {
+  const lowerQuery = query.toLowerCase();
+  const prefix = [];
+  const contains = [];
+
+  for (const name of list) {
+    const lower = name.toLowerCase();
+    if (lower.startsWith(lowerQuery)) {
+      prefix.push({name, type});
+    } else if (lower.includes(lowerQuery)) {
+      contains.push({name, type});
+    }
+  }
+
+  // Sort by length and alphabetically:
+  const sortFn = (a, b) => {
+    if (a.name.length !== b.name.length) return a.name.length - b.name.length;
+    return a.name.localeCompare(b.name);
+  };
+
+  prefix.sort(sortFn);
+  contains.sort(sortFn);
+
+  return [...prefix, ...contains];
+}
+
+
+// Show suggestions in a dropdown menu:
+function showSuggestions(items) {
   state.suggestionsList.innerHTML = '';
   if (!items || items.length === 0) {
     state.suggestionsList.classList.remove('has-items');
@@ -81,11 +121,8 @@ function showSuggestions(items, type) {
   state.suggestionsList.classList.add('has-items');
 }
 
-/**
- * When a suggestion is clicked, update state.searchSelect
- * @param {string} name
- * @param {string} type
- */
+
+// When a suggestion is clicked, update state.searchSelect:
 function selectSuggestion(name, type) {
   state.suggestionsList.innerHTML = '';
   state.suggestionsList.classList.remove('has-items');
@@ -121,7 +158,8 @@ function selectSuggestion(name, type) {
   }
 }
 
-// Clear the search input and selection
+
+// Clear the search input and selection:
 export function clearSearch() {
   state.searchInput.value = '';
   state.suggestionsList.innerHTML = '';

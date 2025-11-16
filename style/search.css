@@ -10,11 +10,15 @@
 #toggle-btn {
   background: #dddddd;
   border: none;
-  padding: 4px 8px;
+  padding: 6px 12px;
   font-size: 16px;
   cursor: pointer;
-  border-radius: 6px;
+  border-radius: 8px; /* rounded edges */
   transition: background 0.2s;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 #toggle-btn:hover {
@@ -27,27 +31,29 @@
   display: flex;
   align-items: center;
   gap: 4px;
+  flex: 1 1 auto;
+}
+
+#search {
+  position: relative;  /* container for input + suggestions */
+  display: flex;
+  flex-direction: column; /* stack input and dropdown */
+  width: 100%;
+  max-width: 400px;
+  min-width: 200px;
 }
 
 #searchBar {
-  width: 400px;
-  padding: 6px 5px;
-  font-size: 14px;
+  width: 100%;
+  padding: 6px 8px 6px 32px;
+  border-radius: 8px;
   box-sizing: border-box;
-}
-
-#clearSearchBtn {
-  background: #dddddd;
-  border: none;
-  padding: 4px 8px;
+  border: 1px solid #ccc;
+  background: #fff url('Lupa.png') no-repeat 8px center;  /* icon on the left */
+  background-size: 16px 16px;
+  height: 32px;
   font-size: 16px;
-  cursor: pointer;
-  border-radius: 6px;
-  transition: background 0.2s;
-}
-
-#clearSearchBtn:hover {
-  background: #acacac;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 .suggestions-list {
@@ -62,9 +68,15 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  width: 300px;
+  width: 100%;
   border: none;
   display: none;
+  border: 1px solid #dddddd;
+  border-top: none;
+  border-radius: 0 0 8px 8px; /* match input bottom corners */
+  display: none;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
 }
 
 /* Each suggestion item */
@@ -84,6 +96,24 @@
 
 .suggestions-list.has-items {
   display: block;
-  border: 1px solid #dddddd;
-  border-top: none;
+}
+
+#clearSearchBtn {
+  background: #dddddd;
+  border: none;
+  padding: 6px 12px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.2s;
+  font-size: 16px;
+  line-height: 1;
+  height: 30px;
+  width: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#clearSearchBtn:hover {
+  background: #acacac;
 }

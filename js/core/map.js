@@ -179,8 +179,11 @@ function handleAreaClick(feature) {
 }
 
 //clicking off the focused area
-export function unfocusArea() {
+export function unfocusArea(calledBySearch = false) {
   const { CONFIG } = state;
+  if (calledBySearch) {
+    clearSearch();
+  }
   if (!state.selectedArea) return;
 
   state.clickLocked = true;
@@ -189,7 +192,6 @@ export function unfocusArea() {
   const overlay = document.getElementById("focused-area");
   overlay.innerHTML = "";
   state.selectedArea = null;
-  clearSearch()
 
   setTimeout(() => (state.clickLocked = false), CONFIG.BLUR_EFFECT.duration * 1000);
 }
