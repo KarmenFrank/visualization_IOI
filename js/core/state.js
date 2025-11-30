@@ -47,7 +47,7 @@ export const state = {
 
   
   CONFIG: {
-    INITIAL_VIEW: { center: [46.15, 14.995], zoom: 9.25 },
+    INITIAL_VIEW: { center: [46.15, 14.995], zoom: 8.95 },
     MAP_STYLE: { background: "#a5e1f0ff" },
     AREA_STYLE: { color: "#555", weight: 1, fillColor: "#e0e0e0", fillOpacity: 1.0 },
     FOCUSED_STYLE: { color: "#000", weight: 2, fillColor: "#fff", fillOpacity: 1.0 },
@@ -62,12 +62,10 @@ export const state = {
       MIN_VALUE : 0,
       MAX_VALUE : 1_00_000,
       low_color: "#95f1bbff",
-      mid_color : "#ffffffff",
+      mid_color: "#ffff00ff",
+      high_mid_color: "#ffa500ff",
       high_color: "#e64934ff",
-
-
-
-      error_color: "#ff0000ff"
+      error_color: "#e0e0e0"
     },
     LOADING_EFFECT: {
       blur: "20px",

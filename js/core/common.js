@@ -42,19 +42,41 @@ function lerpRgb(a, b, t) {
     ];
 }
 
+function lerpMultiRgb(colors, t) {
+    // colors: array of hex, t: 0..1
+    const n = colors.length - 1;
+    const segment = Math.min(Math.floor(t * n), n - 1);
+    const localT = (t - segment / n) * n;
+    return lerpRgb(colors[segment], colors[segment + 1], localT);
+}
+
 
 
 export function calcAreaColor(area_data) {
     const { TOURIST_COLORS } = state.CONFIG;
 
+    // // No data available -> gray:
+    // if (!area_data.countries || area_data.countries.length === 0) {
+    //     return TOURIST_COLORS.error_color;
+    // }
+
     const total = area_data.countries.reduce((sum, c) => sum + (c.data.data || 0), 0);
+
+    if (total === 0) return TOURIST_COLORS.error_color; // no data or no visits
+
     const vmin = TOURIST_COLORS.MIN_VALUE;
     const vmax = TOURIST_COLORS.MAX_VALUE;
 
     let t = (total - vmin) / (vmax - vmin);
     t = Math.min(1, Math.max(0, t));
 
-    const rgb = lerpRgb(TOURIST_COLORS.low_color, TOURIST_COLORS.high_color, t);
+    const gradientColors = [
+        TOURIST_COLORS.low_color,
+        TOURIST_COLORS.mid_color,
+        TOURIST_COLORS.high_mid_color,
+        TOURIST_COLORS.high_color
+    ];
 
+    const rgb = lerpMultiRgb(gradientColors, t);
     return `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
 }

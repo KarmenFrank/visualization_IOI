@@ -10,9 +10,11 @@
 
 
 # TODO
-- fix color mapping for showing counts
+- **PARTIALLY DONE:** fix color mapping for showing counts
 - add detailed information about SR/municipality when the clicked area zooms in
 - hook up data for statistical regions on map
 - hook up nationality filtering to displaying counts with map -> add in applyNationalityFilter function (filter.js), three cases
 - check if filtering works with statistical regions - touristData
 - show important events on global graph
+- add **limited** panning and zooming on the map, add tooltips (shows name of region/municipality when hovering)
+- if possible, make the timeline easier to click on
