@@ -25,6 +25,7 @@ export const state = {
   },
 
   allNationalities: [],
+  tempNationalities: null,
   selectedNationalities: null,
 
   isMunicipalityView: true,
