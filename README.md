@@ -16,5 +16,14 @@
 - hook up nationality filtering to displaying counts with map -> add in applyNationalityFilter function (filter.js), three cases
 - check if filtering works with statistical regions - touristData
 - show important events on global graph
-- add **limited** panning and zooming on the map, add tooltips (shows name of region/municipality when hovering)
+- add **limited** panning and zooming on the map
+- add tooltips (shows name of region/municipality when hovering) :D
 - if possible, make the timeline easier to click on
+- disable timeline month label selection
+- korona 1. val, 2. val etc.
+- poletne sezone
+
+- zoomed area - box as canvas
+* ime zgoraj, pitachart (bottom n% zdruzimo), zastavice + tooltip z imenom in statistiko
+
+* BREGAR - DO SOBOTE DATA ZA ST REGIJE
