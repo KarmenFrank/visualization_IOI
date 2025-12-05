@@ -25,5 +25,3 @@
 
 - zoomed area - box as canvas
 * ime zgoraj, pitachart (bottom n% zdruzimo), zastavice + tooltip z imenom in statistiko
-
-* BREGAR - DO SOBOTE DATA ZA ST REGIJE
