@@ -29,7 +29,9 @@ export const state = {
   },
 
   // Filter:
-  allNationalities: [],
+  nationalitiesMun: null,
+  nationalitiesSr: null,
+  allNationalities: null,
   tempNationalities: null,
   selectedNationalities: null,
 

@@ -29,3 +29,12 @@ export async function loadSearchData() {
   const response = await fetch("data/regije_obcine_naselja.json");
   state.searchData = await response.json();
 }
+
+export async function loadFilterData() {
+  const [mun, sr] = await Promise.all([
+    fetch("data/nationalities_mun.json").then(r => r.json()),
+    fetch("data/nationalities_sr.json").then(r => r.json())
+  ]);
+  state.nationalitiesMun = mun;
+  state.nationalitiesSr = sr;
+}

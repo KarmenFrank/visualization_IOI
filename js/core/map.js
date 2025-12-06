@@ -1,6 +1,7 @@
 import { state } from './state.js';
 import { normalizeAreaName, calcAreaColor } from './common.js';
 import { clearSearch } from './search.js';
+import { clearFilters } from './filter.js';
 
 
 export function initMap() {
@@ -136,7 +137,8 @@ function toggleView() {
   unfocusArea();
   updateMapShape();
   updateMapColors();
-  // Clear filters: TODO
+  // Clear filters:
+  clearFilters();
 }
 
 

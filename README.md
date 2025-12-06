@@ -12,8 +12,7 @@
 # TODO
 - **PARTIALLY DONE:** fix color mapping for showing counts
 - add detailed information about SR/municipality when the clicked area zooms in
-- hook up nationality filtering to displaying counts with map -> add in applyNationalityFilter function (filter.js), three cases
-- check if filtering works with statistical regions - touristData
+- hook up nationality filtering to displaying counts with map -> add in applyNationalityFilter function (filter.js), three cases (also depends on isMunicipalityView)
 - show important events on global graph
 - add **limited** panning and zooming on the map
 - add tooltips (shows name of region/municipality when hovering) :D
@@ -27,3 +26,4 @@
 
 **DONE**
 - hook up data for statistical regions on map
+- check if filtering works with statistical regions

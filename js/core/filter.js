@@ -2,29 +2,19 @@ import { state } from './state.js';
 
 
 export function initFilter() {
-  const all = new Set();
+  state.nationalitiesMun = normalizeNationalityList(state.nationalitiesMun);
 
-  state.touristData.forEach(monthEntry => {
-    const municipalities = monthEntry.municipalities;
-    for (const munKey in municipalities) {
-      const mun = municipalities[munKey];
-      if (!mun.countries) continue;
+  state.allNationalities = state.isMunicipalityView
+    ? state.nationalitiesMun
+    : state.nationalitiesSr;
 
-      mun.countries.forEach(country => {
-        const name = country.countryNameEnglish;
-        if (name) all.add(name);
-      });
-    }
-  });
-
-  state.allNationalities = normalizeNationalityList(all);
   state.selectedNationalities = new Set();
 
   renderNationalityDropdown();
 }
 
 
-export function normalizeNationalityList(allNamesSet) {
+function normalizeNationalityList(allNamesSet) {
   let list = [...allNamesSet];
 
   // Remove Total and Foreign:
@@ -56,6 +46,26 @@ export function normalizeNationalityList(allNamesSet) {
     ...normal,
     ...others
   ];
+}
+
+
+export function clearFilters() {
+  // When switching between regions and municipalities,
+  // filters are reset:
+  state.selectedNationalities = new Set();
+  state.tempNationalities = new Set();
+
+  state.allNationalities = state.isMunicipalityView
+  ? state.nationalitiesMun
+  : state.nationalitiesSr;
+
+  // Close dropdown if open, remove red dot if shown:
+  const dropdown = document.getElementById("filterDropdown");
+  dropdown.classList.add("hidden");
+  const filterBtn = document.getElementById("filterBtn");
+  filterBtn.classList.remove("active");
+
+  renderNationalityDropdown();
 }
 
 
@@ -101,9 +111,6 @@ function renderNationalityDropdown() {
       } else {
         state.tempNationalities.delete(name);
       }
-
-      // Selected nationalities:
-      console.log("Selected nationalities:", [...state.tempNationalities]);
 
       // Update Select All checkbox state:
       selectAllCheckbox.checked = state.tempNationalities.size === state.allNationalities.length;
