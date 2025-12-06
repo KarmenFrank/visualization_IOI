@@ -63,7 +63,7 @@ export function updateMapShape() {
 
 
 export function updateMapColors() {
-  const { CONFIG, touristData, geoLayer } = state;
+  const { CONFIG, touristData, geoLayer, isMunicipalityView } = state;
 
   if (touristData.length < 0)  return;
 
@@ -73,14 +73,16 @@ export function updateMapColors() {
   
   if (!selectedMonth || !geoLayer) return;
 
-  const municipalities = selectedMonth.municipalities;
+  const areaData = isMunicipalityView 
+    ? selectedMonth.municipalities 
+    : selectedMonth.regions;
 
   geoLayer.eachLayer(layer => {
     const nameRaw = layer.feature.properties.OB_UIME || layer.feature.properties.SR_UIME;
     if (!nameRaw) return;
 
     const name = normalizeAreaName(nameRaw);
-    const entry = municipalities[name];
+    const entry = areaData[name];
 
     if (entry) {
       layer.setStyle({ fillColor: calcAreaColor(entry) });
@@ -121,14 +123,20 @@ export function unblurMap() {
 
 
 
-//switch between municipality and statistical area view
+// switch between municipality and statistical area view
 function toggleView() {
   state.isMunicipalityView = !state.isMunicipalityView;
+
+  if (state.isMunicipalityView) {
+    state.touristData = structuredClone(state.touristDataMun);
+  } else {
+    state.touristData = structuredClone(state.touristDataSr);
+  }
 
   unfocusArea();
   updateMapShape();
   updateMapColors();
-
+  // Clear filters: TODO
 }
 
 

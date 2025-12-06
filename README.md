@@ -12,7 +12,6 @@
 # TODO
 - **PARTIALLY DONE:** fix color mapping for showing counts
 - add detailed information about SR/municipality when the clicked area zooms in
-- hook up data for statistical regions on map
 - hook up nationality filtering to displaying counts with map -> add in applyNationalityFilter function (filter.js), three cases
 - check if filtering works with statistical regions - touristData
 - show important events on global graph
@@ -25,3 +24,6 @@
 
 - zoomed area - box as canvas
 * ime zgoraj, pitachart (bottom n% zdruzimo), zastavice + tooltip z imenom in statistiko
+
+**DONE**
+- hook up data for statistical regions on map

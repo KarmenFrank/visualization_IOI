@@ -4,10 +4,14 @@ export const state = {
 
   municipalityData: null,
   regionData: null,
-  touristData: [],
+
+  touristDataMun: [], // Holds all municipalities tourist data.
+  touristDataSr: [],  // Holds all region tourist data.
+  touristData: [],    // Changes with filtering.
   months: [],
 
-  searchData: null,
+  // Search:
+  searchData: null,   // Linked names of towns, municipalities and regions.
   towns: [],
   townSet: null,
   municipalities: [],
@@ -24,10 +28,12 @@ export const state = {
     town: null
   },
 
+  // Filter:
   allNationalities: [],
   tempNationalities: null,
   selectedNationalities: null,
 
+  // Map:
   isMunicipalityView: true,
   selectedArea: null,
   clickLocked: false,
