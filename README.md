@@ -11,7 +11,8 @@
 
 # TODO
 - add detailed information about SR/municipality when the clicked area zooms in
-- hook up nationality filtering to displaying counts with map -> add in applyNationalityFilter function (filter.js), three cases (also depends on isMunicipalityView)
+- zoomed area - box as canvas
+* ime zgoraj, pitachart (bottom n% zdruzimo), zastavice + tooltip z imenom in statistiko
 
 - add legend
 - update color min and max to better match the data
@@ -24,11 +25,11 @@
 - korona 1. val, 2. val etc.
 - poletne sezone
 
-- zoomed area - box as canvas
-* ime zgoraj, pitachart (bottom n% zdruzimo), zastavice + tooltip z imenom in statistiko
+
 
 **DONE**
 - hook up data for statistical regions on map
 - check if filtering works with statistical regions
 - fixed color mapping for showing counts
 - touristData contains only total values - faster switching
+- hook up nationality filtering to displaying counts with map -> add in applyNationalityFilter function (filter.js), three cases (also depends on isMunicipalityView)
