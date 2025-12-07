@@ -7,7 +7,9 @@ export const state = {
 
   touristDataMun: [], // Holds all municipalities tourist data.
   touristDataSr: [],  // Holds all region tourist data.
-  touristData: [],    // Changes with filtering.
+  touristDataMunTotal: [], // Holds only total for municipalities.
+  touristDataSrTotal: [],  // Holds only total for regions.
+  touristData: [],    // Changes with filtering, contains only Total.
   months: [],
 
   // Search:

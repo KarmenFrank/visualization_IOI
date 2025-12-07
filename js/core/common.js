@@ -55,20 +55,28 @@ function lerpMultiRgb(colors, t) {
 export function calcAreaColor(area_data) {
     const { TOURIST_COLORS } = state.CONFIG;
 
-    // // No data available -> gray:
-    // if (!area_data.countries || area_data.countries.length === 0) {
-    //     return TOURIST_COLORS.error_color;
-    // }
+    // const total = area_data.countries.reduce((sum, c) => sum + (c.data.data || 0), 0);
+    const total = area_data.countries.find(c => c.countryNameEnglish === "Total")?.data.data || 0;
 
-    const total = area_data.countries.reduce((sum, c) => sum + (c.data.data || 0), 0);
-
-    if (total === 0) return TOURIST_COLORS.error_color; // no data or no visits
+    // if (total === 0) return TOURIST_COLORS.error_color; // no data or no visits
 
     const vmin = TOURIST_COLORS.MIN_VALUE;
     const vmax = TOURIST_COLORS.MAX_VALUE;
 
+    // Linear:
     let t = (total - vmin) / (vmax - vmin);
     t = Math.min(1, Math.max(0, t));
+
+    const SCALE_TYPE = "power";   // "linear" | "power" | "log"
+
+    // Powerscale or logarithmic:
+    if (SCALE_TYPE === "power") {
+        const exponent = 0.5;
+        t = Math.pow(t, exponent);
+    } else if (SCALE_TYPE === "log") {
+        const logScaled = Math.log10(total + 1) / Math.log10(vmax + 1);
+        t = Math.min(1, Math.max(0, logScaled));
+    }
 
     const gradientColors = [
         TOURIST_COLORS.low_color,

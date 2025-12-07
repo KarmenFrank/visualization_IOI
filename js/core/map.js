@@ -1,7 +1,7 @@
 import { state } from './state.js';
 import { normalizeAreaName, calcAreaColor } from './common.js';
 import { clearSearch } from './search.js';
-import { clearFilters } from './filter.js';
+import { clearFilters, copyTouristData } from './filter.js';
 
 
 export function initMap() {
@@ -83,7 +83,8 @@ export function updateMapColors() {
     if (!nameRaw) return;
 
     const name = normalizeAreaName(nameRaw);
-    const entry = areaData[name];
+    const entry = areaData[name]; // selected municipality or region
+
 
     if (entry) {
       layer.setStyle({ fillColor: calcAreaColor(entry) });
@@ -128,19 +129,15 @@ export function unblurMap() {
 function toggleView() {
   state.isMunicipalityView = !state.isMunicipalityView;
 
-  if (state.isMunicipalityView) {
-    state.touristData = structuredClone(state.touristDataMun);
-  } else {
-    state.touristData = structuredClone(state.touristDataSr);
-  }
+  copyTouristData()
 
   unfocusArea();
   updateMapShape();
   updateMapColors();
+
   // Clear filters:
   clearFilters();
 }
-
 
 
 

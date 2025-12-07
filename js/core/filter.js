@@ -1,4 +1,5 @@
 import { state } from './state.js';
+import { updateMapColors } from './map.js';
 
 
 export function initFilter() {
@@ -66,6 +67,15 @@ export function clearFilters() {
   filterBtn.classList.remove("active");
 
   renderNationalityDropdown();
+}
+
+
+export function copyTouristData() {
+  if (state.isMunicipalityView) {
+    state.touristData = structuredClone(state.touristDataMunTotal);
+  } else {
+    state.touristData = structuredClone(state.touristDataSrTotal);
+  }
 }
 
 
@@ -179,17 +189,111 @@ function applyNationalityFilter() {
   const sel = [...state.selectedNationalities];
 
   // CASE 1: All selected
-  if (sel.length === state.allNationalities.length) {
-    // Plot "Total":
+  if (sel.length === state.allNationalities.length || sel.length === 0) {
+    // No recomputing needed, just copy all totals:
+    copyTouristData()
+    updateMapColors()
     return;
   }
+
 
   // CASE 2: All except Domestic
   if (!state.selectedNationalities.has("Domestic") && sel.length === state.allNationalities.length - 1) {
-    // Plot "Foreign":
+    // Copy Foreign values:
+    const sourceData = state.isMunicipalityView ? state.touristDataMun : state.touristDataSr;
+
+    state.touristData = sourceData.map(monthEntry => {
+      // For municipalities:
+      if (state.isMunicipalityView) {
+        const newMunicipalities = {};
+
+        for (const [munKey, munData] of Object.entries(monthEntry.municipalities)) {
+          newMunicipalities[munKey] = {
+            ...munData,
+            countries: (munData.countries || [])
+              .filter(c => c.countryNameEnglish === "Foreign")
+              .map(c => ({ ...c, countryNameEnglish: "Total", name: "skupaj" }))
+          };
+        }
+        return { ...monthEntry, municipalities: newMunicipalities };
+
+      // For regions:
+      } else {
+        const newRegions = {};
+
+        for (const [regionKey, regionData] of Object.entries(monthEntry.regions)) {
+          newRegions[regionKey] = {
+            ...regionData,
+            countries: (regionData.countries || [])
+              .filter(c => c.countryNameEnglish === "Foreign")
+              .map(c => ({ ...c, countryNameEnglish: "Total", name: "skupaj" }))
+          };
+        }
+        return { ...monthEntry, regions: newRegions };
+      }
+    });
+    console.log(state.touristData)
+    
+    updateMapColors()
     return;
   }
 
+
   // CASE 3: Mixed selection
-  // Plot specific countries - TODO: filtering
+  const selectedSet = new Set(sel); // for faster lookups
+  const sourceData = state.isMunicipalityView ? state.touristDataMun : state.touristDataSr;
+
+  state.touristData = sourceData.map(monthEntry => {
+    // For municipalities:
+    if (state.isMunicipalityView) {
+      const newMunicipalities = {};
+
+      for (const [munKey, munData] of Object.entries(monthEntry.municipalities)) {
+        // Sum data for selected countries
+        const totalData = munData.countries
+          .filter(c => selectedSet.has(c.countryNameEnglish))
+          .reduce((acc, c) => {
+            const value = c.data?.data || 0;
+            return acc + value;
+          }, 0);
+
+        // Create a single "Total" country
+        newMunicipalities[munKey] = {
+          ...munData,
+          countries: [
+            {
+              name: "skupaj",
+              countryNameEnglish: "Total",
+              data: { ...munData.countries[0].data, data: totalData }
+            }
+          ]
+        };
+      }
+      return { ...monthEntry, municipalities: newMunicipalities };
+
+    // For regions:
+    } else {
+      const newRegions = {};
+
+      for (const [regionKey, regionData] of Object.entries(monthEntry.regions)) {
+        const totalData = regionData.countries
+          .filter(c => selectedSet.has(c.countryNameEnglish))
+          .reduce((acc, c) => acc + (c.data?.data || 0), 0);
+
+        newRegions[regionKey] = {
+          ...regionData,
+          countries: [
+            {
+              name: "skupaj",
+              countryNameEnglish: "Total",
+              data: { ...regionData.countries[0].data, data: totalData }
+            }
+          ]
+        };
+      }
+      return { ...monthEntry, regions: newRegions };
+    }
+  });
+
+  updateMapColors()
 }

@@ -10,14 +10,17 @@
 
 
 # TODO
-- **PARTIALLY DONE:** fix color mapping for showing counts
 - add detailed information about SR/municipality when the clicked area zooms in
 - hook up nationality filtering to displaying counts with map -> add in applyNationalityFilter function (filter.js), three cases (also depends on isMunicipalityView)
-- show important events on global graph
+
+- add legend
+- update color min and max to better match the data
 - add **limited** panning and zooming on the map
 - add tooltips (shows name of region/municipality when hovering) :D
 - if possible, make the timeline easier to click on
 - disable timeline month label selection
+
+- show important events on global graph
 - korona 1. val, 2. val etc.
 - poletne sezone
 
@@ -27,3 +30,5 @@
 **DONE**
 - hook up data for statistical regions on map
 - check if filtering works with statistical regions
+- fixed color mapping for showing counts
+- touristData contains only total values - faster switching
