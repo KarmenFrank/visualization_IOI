@@ -1,5 +1,6 @@
 import { state } from './state.js';
 import { updateMapColors } from './map.js';
+import { setGraphIndex } from './graph.js';
 
 
 export function initFilter() {
@@ -296,4 +297,5 @@ function applyNationalityFilter() {
   });
 
   updateMapColors()
+  setGraphIndex(state.currentMonthIndex);   // refresh graph at current month
 }

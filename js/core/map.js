@@ -2,7 +2,7 @@ import { state } from './state.js';
 import { normalizeAreaName, calcAreaColor } from './common.js';
 import { clearSearch } from './search.js';
 import { clearFilters, copyTouristData } from './filter.js';
-
+import { setGraphRegion, setGraphTitle } from './graph.js';
 
 export function initMap() {
   const { CONFIG } = state;
@@ -181,6 +181,12 @@ function handleAreaClick(feature) {
   state.selectedArea = feature;
   state.clickLocked = true;
 
+  // tell the graph which area we selected
+  const nameRaw = feature.properties.OB_UIME || feature.properties.SR_UIME;
+  const name = nameRaw ? normalizeAreaName(nameRaw) : "slovenija";
+  setGraphRegion(name);
+  setGraphTitle(nameRaw);
+
   blurMap();
   drawFocusedArea(feature);
 }
@@ -199,6 +205,11 @@ export function unfocusArea(calledBySearch = false) {
   const overlay = document.getElementById("focused-area");
   overlay.innerHTML = "";
   state.selectedArea = null;
+
+  // reset graph to whole Slovenia
+  setGraphRegion(null);
+  setGraphRegion(null);             // back to Slovenia data
+  setGraphTitle("Slovenia");
 
   setTimeout(() => (state.clickLocked = false), CONFIG.BLUR_EFFECT.duration * 1000);
 }
