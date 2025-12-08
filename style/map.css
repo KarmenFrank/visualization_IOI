@@ -1,6 +1,3 @@
-body {
-  font-family: Arial, Helvetica, sans-serif;
-}
 
 #map-container {
   position: relative;
@@ -9,31 +6,66 @@ body {
   overflow: hidden;
 }
 
+/* Leaflet map */
 #map {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   z-index: 100;
 }
 
-#focused-area {
+/* Municipality zoom container */
+#focused-area-wrapper {
   position: absolute;
-  top: 0;
-  left: 0;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+  overflow: visible;
+}
+
+#focused-area-svg {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
-  z-index: 200;
   pointer-events: none;
 }
 
-#focused-area.loading {
-  backdrop-filter: blur(10px) brightness(0.8);
-  background: rgba(255, 255, 255, 0.3);
+#focused-area-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+
+  width: 67%;
+  height: 100%;
+
+  pointer-events: none;
+
   display: flex;
-  align-items: center;
   justify-content: center;
-  opacity: 1;
-  pointer-events: all;
+  align-items: center;
+
+  background: transparent;
+  overflow: visible;
+  z-index: 300;
+}
+
+
+#focused-area-panel .panel-card {
+  pointer-events: none;
+
+  width: 90%;
+  max-width: 600px; 
+  min-height: 400px;
+
+  background: rgba(255,255,255,0.95);
+  border-radius: 20px;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.18);
+
+  padding: 40px;       /* more padding */
+
+  opacity: 0;
+  transform: scale(0.6);
+  transition: transform 0.35s ease, opacity 0.35s ease;
+
+  margin: auto;
 }

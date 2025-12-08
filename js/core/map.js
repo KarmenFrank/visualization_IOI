@@ -3,6 +3,7 @@ import { normalizeAreaName, calcAreaColor } from './common.js';
 import { clearSearch } from './search.js';
 import { clearFilters, copyTouristData } from './filter.js';
 import { setGraphRegion, setGraphTitle } from './graph.js';
+import { generateFocusedAreaData } from './area_card.js';
 
 export function initMap() {
   const { CONFIG } = state;
@@ -171,7 +172,6 @@ export function selectByID(){
 
 
 
-//handler for clicking on municipalities/statistical areas
 function handleAreaClick(feature) {
   if (state.selectedArea) {
     unfocusArea();
@@ -181,7 +181,6 @@ function handleAreaClick(feature) {
   state.selectedArea = feature;
   state.clickLocked = true;
 
-  // tell the graph which area we selected
   const nameRaw = feature.properties.OB_UIME || feature.properties.SR_UIME;
   const name = nameRaw ? normalizeAreaName(nameRaw) : "slovenija";
   setGraphRegion(name);
@@ -191,71 +190,179 @@ function handleAreaClick(feature) {
   drawFocusedArea(feature);
 }
 
-//clicking off the focused area
+
+
 export function unfocusArea(calledBySearch = false) {
   const { CONFIG } = state;
-  if (calledBySearch) {
-    clearSearch();
-  }
+
+  if (calledBySearch) clearSearch();
   if (!state.selectedArea) return;
 
   state.clickLocked = true;
   unblurMap();
 
-  const overlay = document.getElementById("focused-area");
-  overlay.innerHTML = "";
-  state.selectedArea = null;
+  const wrapper = document.getElementById("focused-area-wrapper");
+  const svgOverlay = document.getElementById("focused-area-svg");
+  const panel = document.getElementById("focused-area-panel");
 
-  // reset graph to whole Slovenia
+  wrapper.style.transition =
+    `transform ${CONFIG.ENLARGE_EFFECT.duration}s ${CONFIG.ENLARGE_EFFECT.easing}`;
+  wrapper.style.transform = "none";
+
+  svgOverlay.innerHTML = "";
+
+  const card = panel.querySelector(".panel-card");
+  if (card) {
+    card.style.opacity = "0";
+    card.style.transform = "scale(0.6)";
+  }
+
+  panel.style.opacity = "0";
+  panel.style.pointerEvents = "none";
+
+  setTimeout(() => {
+    panel.innerHTML = "";
+  }, 350);
+
+  state.selectedArea = null;
   setGraphRegion(null);
-  setGraphRegion(null);             // back to Slovenia data
   setGraphTitle("Slovenia");
 
-  setTimeout(() => (state.clickLocked = false), CONFIG.BLUR_EFFECT.duration * 1000);
+  setTimeout(
+    () => (state.clickLocked = false),
+    CONFIG.ENLARGE_EFFECT.duration * 1000
+  );
 }
 
 
 
-//displaying the focused area - WIP
+
+
+
+
+
+
+
 function drawFocusedArea(feature) {
   const { map, CONFIG } = state;
 
-  const overlay = document.getElementById("focused-area");
-  overlay.innerHTML = "";
+  const wrapper = document.getElementById("focused-area-wrapper");
+  const svgOverlay = document.getElementById("focused-area-svg");
+  const panel = document.getElementById("focused-area-panel");
+
+  svgOverlay.innerHTML = "";
+  panel.innerHTML = "";
 
   const tempLayer = L.geoJSON(feature, { style: CONFIG.FOCUSED_STYLE }).addTo(map);
 
   requestAnimationFrame(() => {
-    const svg = map.getPanes().overlayPane.querySelector("svg");
-    const leafletPath = svg?.querySelector("path:last-of-type");
+
+    const leafletSvg = map.getPanes().overlayPane.querySelector("svg");
+    const leafletPath = leafletSvg?.querySelector("path:last-of-type");
     if (!leafletPath) return;
 
+    // Clone municipality outline
     const svgPath = leafletPath.cloneNode();
-    svgPath.setAttribute("vector-effect", "non-scaling-stroke");
-    overlay.appendChild(svgPath);
+    svgPath.setAttribute("fill", "#ffffff");
+    svgPath.setAttribute("fill-opacity", "1");
+    svgOverlay.appendChild(svgPath);
 
     map.removeLayer(tempLayer);
 
+    // --- BBOX + screen position ---
     const bbox = svgPath.getBBox();
-    const box = overlay.getBoundingClientRect();
-    const cx = box.width / 2;
-    const cy = box.height / 2;
+    const box = wrapper.getBoundingClientRect();
+
+    const W = box.width;
+    const H = box.height;
+
+    // Left-side target position
+    const targetX = W * 0.17;
+    const targetY = H * 0.5;
+
+    // Original centroid IN SVG SPACE
     const fx = bbox.x + bbox.width / 2;
     const fy = bbox.y + bbox.height / 2;
-    const dx = cx - fx;
-    const dy = cy - fy;
 
-    const scaleX = (box.width * CONFIG.ENLARGE_EFFECT.targetWidthRatio) / bbox.width;
-    const scaleY = (box.height * CONFIG.ENLARGE_EFFECT.targetHeightRatio) / bbox.height;
+    // Convert centroid to screen coordinates
+    // This gives us the starting point for the card animation
+    const pt = wrapper.querySelector("svg").createSVGPoint();
+    pt.x = fx;
+    pt.y = fy;
+    const screenPoint = pt.matrixTransform(wrapper.querySelector("svg").getScreenCTM());
+
+    const dx = targetX - fx;
+    const dy = targetY - fy;
+
+    // Scale fit in left 1/3
+    const maxWidth = W * 0.28;
+    const scaleX = maxWidth / bbox.width;
+    const scaleY = (H * 0.8) / bbox.height;
     const scale = Math.min(scaleX, scaleY);
 
-    svgPath.style.transition = `transform ${CONFIG.ENLARGE_EFFECT.duration}s ${CONFIG.ENLARGE_EFFECT.easing}`;
-    svgPath.style.transformOrigin = `${fx}px ${fy}px`;
-    svgPath.style.transform = `translate(${dx}px, ${dy}px) scale(${scale})`;
+    const transformValue = `translate(${dx}px, ${dy}px) scale(${scale})`;
 
-    setTimeout(() => (state.clickLocked = false), CONFIG.ENLARGE_EFFECT.duration * 1000);
+    wrapper.style.transition =
+      `transform ${CONFIG.ENLARGE_EFFECT.duration}s ${CONFIG.ENLARGE_EFFECT.easing}`;
+    wrapper.style.transformOrigin = `${fx}px ${fy}px`;
+    wrapper.style.transform = transformValue;
+
+    // Stroke width fix
+    const stroke = parseFloat(svgPath.getAttribute("stroke-width")) || 1;
+    svgPath.style.strokeWidth = (stroke / scale) + "px";
+
+    // ======================================================================
+    // PANEL + CARD ANIMATION (new)
+    // ======================================================================
+
+    panel.style.pointerEvents = "none";
+    panel.style.width = "67%";
+    panel.style.opacity = "1";
+    panel.innerHTML = "";
+
+    const card = document.createElement("div");
+    card.className = "panel-card";
+    panel.appendChild(card);
+
+    // Fill the card with text
+    generateFocusedAreaData(feature, card);
+
+    // Compute panel center (final position)
+    const panelBox = panel.getBoundingClientRect();
+    const finalX = panelBox.width / 2;
+    const finalY = panelBox.height / 2;
+
+    // INITIAL position: municipality centroid (screen coords)
+    const localStartX = screenPoint.x - panelBox.left;
+    const localStartY = screenPoint.y - panelBox.top;
+
+    // Card starts here, tiny
+    card.style.position = "absolute";
+    card.style.left = `${localStartX}px`;
+    card.style.top = `${localStartY}px`;
+    card.style.opacity = "0";
+    card.style.transformOrigin = "50% 50%";
+    card.style.transform = "translate(-50%, -50%) scale(0.0)";
+    card.style.pointerEvents = "auto";
+
+
+    // Animate into center of panel
+    requestAnimationFrame(() => {
+      card.style.transition =
+        `transform ${CONFIG.ENLARGE_EFFECT.duration}s ${CONFIG.ENLARGE_EFFECT.easing},
+         opacity ${CONFIG.ENLARGE_EFFECT.duration}s ${CONFIG.ENLARGE_EFFECT.easing},
+         left ${CONFIG.ENLARGE_EFFECT.duration}s ${CONFIG.ENLARGE_EFFECT.easing},
+         top ${CONFIG.ENLARGE_EFFECT.duration}s ${CONFIG.ENLARGE_EFFECT.easing}`;
+
+      card.style.left = `${finalX}px`;
+      card.style.top = `${finalY}px`;
+      card.style.opacity = "1";
+      card.style.transform = "translate(-50%, -50%) scale(1)";
+    });
+
+    setTimeout(
+      () => (state.clickLocked = false),
+      CONFIG.ENLARGE_EFFECT.duration * 1000
+    );
   });
 }
-
-
-
