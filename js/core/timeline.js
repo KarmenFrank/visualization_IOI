@@ -1,7 +1,7 @@
 import { state } from './state.js';
 import { updateMapColors } from './map.js';
 import { setGraphIndex } from './graph.js';
-
+import { updateAreaCard } from './area_card.js';
 
 // calls this whenever the currentMonthIndex changes
 function updateGraphMarkerFromTimeline() {
@@ -52,6 +52,7 @@ export function populateTimelineWithMonths() {
     stopPlayback();
     updateTimeline();
     updateMapColors();
+    updateAreaCard();
     updateGraphMarkerFromTimeline();
   });
 
@@ -152,6 +153,7 @@ export function playLoop() {
 
   updateMapColors();
   updateTimeline();
+  updateAreaCard();
   updateGraphMarkerFromTimeline();
 }
 

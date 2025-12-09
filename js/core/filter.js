@@ -1,6 +1,7 @@
 import { state } from './state.js';
 import { updateMapColors } from './map.js';
 import { setGraphIndex } from './graph.js';
+import { updateAreaCard } from './area_card.js';
 
 
 export function initFilter() {
@@ -192,8 +193,9 @@ function applyNationalityFilter() {
   // CASE 1: All selected
   if (sel.length === state.allNationalities.length || sel.length === 0) {
     // No recomputing needed, just copy all totals:
-    copyTouristData()
-    updateMapColors()
+    copyTouristData();
+    updateMapColors();
+    updateAreaCard();
     return;
   }
 
@@ -235,7 +237,8 @@ function applyNationalityFilter() {
     });
     console.log(state.touristData)
     
-    updateMapColors()
+    updateMapColors();
+    updateAreaCard();
     return;
   }
 
@@ -296,6 +299,7 @@ function applyNationalityFilter() {
     }
   });
 
-  updateMapColors()
+  updateMapColors();
+  updateAreaCard();
   setGraphIndex(state.currentMonthIndex);   // refresh graph at current month
 }

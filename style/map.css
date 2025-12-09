@@ -69,3 +69,9 @@
 
   margin: auto;
 }
+
+
+.pie-tooltip {
+    transition: opacity 0.1s ease;
+    z-index: 9999;
+}

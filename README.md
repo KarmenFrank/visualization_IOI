@@ -27,9 +27,18 @@
 
 
 
+
+**BUGS**
+- when timeline playing and unfocusing card - error but non fatal (make handling for it)
+- possible bug of some municipalities just not having any tourists OR they just really that dead - investigate pipeline (check month where its all 0, check json for sanity check)
+
+
 **DONE**
 - hook up data for statistical regions on map
 - check if filtering works with statistical regions
 - fixed color mapping for showing counts
 - touristData contains only total values - faster switching
 - hook up nationality filtering to displaying counts with map -> add in applyNationalityFilter function (filter.js), three cases (also depends on isMunicipalityView)
+
+
+
