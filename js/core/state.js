@@ -11,6 +11,7 @@ export const state = {
   touristDataSrTotal: [],  // Holds only total for regions.
   touristData: [],    // Changes with filtering, contains only Total.
   months: [],
+  nationalityTranslations: [],
 
   // Search:
   searchData: null,   // Linked names of towns, municipalities and regions.

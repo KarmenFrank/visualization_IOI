@@ -1,5 +1,5 @@
 import { state } from "./state.js";
-import { normalizeAreaName, calcAreaColor } from './common.js';
+import { normalizeAreaName, normalizeNationalityName, calcAreaColor } from './common.js';
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
 
@@ -54,23 +54,92 @@ function makeDummyPieChart() {
 }
 
 
-function makeDummyTable() {
-    let rows = "";
-    for (let i = 1; i <= 50; i++) {
-        const metric = `Metric ${i}`;
-        const value = (Math.random() * 1000).toFixed(2);
-        const notes = `Note ${Math.ceil(Math.random() * 10)}`;
+function makeTouristTableMunicipality(normalized_mun_name) {
+    const { CONFIG, touristDataMun, geoLayer, currentMonthIndex, months, nationalityTranslations } = state;
 
-        const striped = i % 2 === 0 ? 'style="background:#fafafa;"' : "";
+    const month_string = months[currentMonthIndex];
+    const tourist_data_for_month = touristDataMun.find(item => item.month === month_string);
+    const mun_data = tourist_data_for_month.municipalities[normalized_mun_name];
+
+    if (mun_data == null) {
+        throw new Error(`makeTouristTableMunicipality: mun_data is null for month: ${month_string}`);
+    }
+
+    const mun_display_name = mun_data.display_name;
+    const nationality_data_slovenian_names = mun_data.countries;
+
+    const selected =
+        state.selectedNationalities.size > 0
+            ? new Set(state.selectedNationalities)
+            : new Set(state.allNationalities);
+
+    const unselected = new Set(
+        [...state.allNationalities].filter(n => !selected.has(n))
+    );
+
+    const list_selected = nationality_data_slovenian_names
+        .filter(item => {
+            const slo_norm_name = normalizeNationalityName(item.name);
+            const eng_name = nationalityTranslations[slo_norm_name];
+            return selected.has(eng_name);
+        })
+        .map(item => ({
+            nationality: item.name,
+            tourists: item.data.data
+        }));
+
+    const list_unselected = nationality_data_slovenian_names
+        .filter(item => {
+            const slo_norm_name = normalizeNationalityName(item.name);
+            const eng_name = nationalityTranslations[slo_norm_name];
+            return unselected.has(eng_name);
+        })
+        .map(item => ({
+            nationality: item.name,
+            tourists: item.data.data
+        }));
+
+
+    const unselected_sum = list_unselected.reduce(
+        (acc, item) => acc + item.tourists,
+        0
+    );
+
+    const list_selected_sorted = [...list_selected].sort(
+        (a, b) => b.tourists - a.tourists
+    );
+
+    const final_list = [
+        ...list_selected_sorted,
+        ...(unselected.size > 0
+            ? [{ nationality: "Unselected", tourists: unselected_sum }]
+            : [])
+    ];
+
+    const totalTouristSum = final_list.reduce(
+        (sum, item) => sum + item.tourists,
+        0
+    );
+
+
+    let rows = "";
+    for (const item of final_list) {
+        const eng_name = nationalityTranslations[normalizeNationalityName(item.nationality)];
+        const nationality = eng_name ? eng_name : "Unselected";
+        const tourists = item.tourists;
+        const percent = totalTouristSum > 0
+            ? ((tourists / totalTouristSum) * 100).toFixed(2) + "%"
+            : "0%";
 
         rows += `
-            <tr ${striped}>
-                <td style="padding: 8px 12px;">${metric}</td>
-                <td style="padding: 8px 12px;">${value}</td>
-                <td style="padding: 8px 12px;">${notes}</td>
+            <tr>
+                <td style="padding: 8px 12px;">${nationality}</td>
+                <td style="padding: 8px 12px;">${tourists}</td>
+                <td style="padding: 8px 12px;">${percent}</td>
             </tr>
         `;
     }
+
 
     return `
     <div style="
@@ -88,10 +157,15 @@ function makeDummyTable() {
             min-width: 320px;
         ">
             <thead>
-                <tr style="background: #f0f0f0;">
-                    <th style="padding: 8px 12px; text-align: left;">Metric</th>
-                    <th style="padding: 8px 12px; text-align: left;">Value</th>
-                    <th style="padding: 8px 12px; text-align: left;">Notes</th>
+                <tr style="
+                    background: #f0f0f0;
+                    position: sticky;
+                    top: 0;
+                    z-index: 1;
+                ">
+                    <th style="padding: 8px 12px; text-align: left;">Nationality</th>
+                    <th style="padding: 8px 12px; text-align: left;">Number of tourists</th>
+                    <th style="padding: 8px 12px; text-align: left;">Relative percentage</th>
                 </tr>
             </thead>
 
@@ -101,11 +175,13 @@ function makeDummyTable() {
         </table>
     </div>
     `;
+
 }
 
 
 
-function makeMunicipalityCard(name) {
+
+function makeMunicipalityCard(map_feature, name) {
     return `
         <div class="focused-title" style="font-size: 20px; font-weight: bold; text-align: center;">
             ${name}
@@ -113,7 +189,7 @@ function makeMunicipalityCard(name) {
 
         ${makeDummyPieChart()}
 
-        ${makeDummyTable()}
+        ${makeTouristTableMunicipality(name)}
     `;
 }
 
@@ -137,5 +213,5 @@ export function generateFocusedAreaData(feature, container) {
     const isMunicipality = state.isMunicipalityView;
     const nameRaw = feature.properties.OB_UIME || feature.properties.SR_UIME;
     const name = nameRaw ? normalizeAreaName(nameRaw) : "slovenija";
-    container.innerHTML = isMunicipality ? makeMunicipalityCard(name) : makeStatRegionCard(name);
+    container.innerHTML = isMunicipality ? makeMunicipalityCard(feature, name) : makeStatRegionCard(name);
 }

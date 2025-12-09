@@ -2,17 +2,20 @@ import { state } from './state.js';
 
 
 export async function loadTouristData() {
-  const [munRes, srRes, munTotal, srTotal] = await Promise.all([
+  const [munRes, srRes, munTotal, srTotal, nationalityTranslations] = await Promise.all([
     fetch("data/tourist_data_grouped_ENG.json"),
     fetch("data/sr_data_grouped.json"),
     fetch("data/tourist_data_grouped_total.json"),
-    fetch("data/sr_data_grouped_total.json")
+    fetch("data/sr_data_grouped_total.json"),
+    fetch("data/nationality_translations.json")
   ]);
   
+
   state.touristDataMun = await munRes.json();
   state.touristDataSr = await srRes.json();
   state.touristDataMunTotal = await munTotal.json();
   state.touristDataSrTotal = await srTotal.json();
+  state.nationalityTranslations = await nationalityTranslations.json();
   
   state.touristData = structuredClone(state.touristDataMunTotal);
   state.months = state.touristData.map(d => d.month);

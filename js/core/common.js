@@ -9,6 +9,13 @@ export function normalizeAreaName(str) {
     .toLowerCase();
 }
 
+export function normalizeNationalityName(str) {
+  return str
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase();
+}
+
 
 function parseHexColor(hex) {
     hex = hex.replace('#', '').toLowerCase();
