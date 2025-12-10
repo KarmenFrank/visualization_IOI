@@ -17,6 +17,21 @@ export function normalizeNationalityName(str) {
 }
 
 
+export function formatMonthString(monthString) {
+    const [yearStr, monthStr] = monthString.split("M");
+
+    const year = Number(yearStr);
+    const month = Number(monthStr); // handles "4", "04", "10", etc.
+
+    const date = new Date(year, month - 1, 1);
+
+    return date.toLocaleString("en-US", {
+        month: "long",
+        year: "numeric"
+    });
+}
+
+
 function parseHexColor(hex) {
     hex = hex.replace('#', '').toLowerCase();
     if (hex.length === 8) hex = hex.slice(0, 6); // drop alpha

@@ -161,8 +161,10 @@ export function getFilteredMunicipalityData(normalized_mun_name){
     }
 
     return {
+        month_string : month_string,
         table_list: final_list,
         total_tourist_sum: totalTouristSum,
+        total_tourists_filtered : selectedTotal,
         pie_chart_list: pieChartBase,
         pie_chart_sum : selectedTotal,
         display_name : mun_display_name
@@ -260,8 +262,10 @@ export function getFilteredStatRegionData(normalized_region_name){
     }
 
     return {
+        month_string : month_string,
         table_list: final_list,
         total_tourist_sum: totalTouristSum,
+        total_tourists_filtered : selectedTotal,
         pie_chart_list: pieChartBase,
         pie_chart_sum : selectedTotal,
         display_name : sr_display_name
@@ -333,8 +337,89 @@ export const FLAG_CODE_MAP = {
     "Montenegro": "1f1f2-1f1ea",
     "Spain": "1f1ea-1f1f8",
     "Sweden": "1f1f8-1f1ea",
-    "Switzerland": "1f1e8-1f1ed"
+    "Switzerland": "1f1e8-1f1ed",
+    
+    "Other" : "1f310"
 };
+
+export const COUNTRY_COLORS = {
+
+    // --- Standard countries ---
+    "Australia": "#4C84FF",
+    "Austria": "#FF6B6B",
+    "Belgium": "#4CC276",
+    "Bulgaria": "#FF8484",
+    "Bosnia and Herzegovina": "#36D1C4",
+    "Brazil": "#63D38C",
+    "Cyprus": "#3EC7B5",
+
+    // Domestic
+    "Domestic": "#ff3f3fff",
+
+    // Denmark
+    "Denmark": "#4FBFAF",
+
+    // --- Regional "Other" groups ---
+    "Other African countries": "#5ADFC5",
+    "Other Asian countries": "#81EAD6",
+    "Other countries of South and Middle America": "#73E7D3",
+    "Other countries of Oceania": "#91F0DF",
+    "Other countries of North America": "#7BE3CC",
+    "Other European countries": "#66DBC9",
+
+    // Total
+    "Total": "#C4C4C4",
+
+    // --- Europe / nearby ---
+    "Estonia": "#7BA9FF",
+    "Finland": "#5D9BFF",
+    "France": "#F27CCF",
+    "Greece": "#9C7BFF",
+    "Croatia": "#3AAE64",
+    "Ireland": "#53C06C",
+    "Iceland": "#3F82E8",
+    "Italy": "#8C63FF",
+    "Israel": "#7552E5",
+    "Japan": "#FF5C8A",
+    "South Africa": "#FFB44C",
+    "Canada": "#FF9B4C",
+    "China (People's Republic)": "#E960B1",
+    "Korea (Republic of)": "#52D6D0",
+    "Latvia": "#F4AD4F",
+    "Lithuania": "#FFCA5C",
+    "Luxembourg": "#A58BFF",
+    "Hungary": "#CBEA5E",
+    "North Macedonia": "#B4D856",
+    "Malta": "#EA5FA0",
+    "Germany": "#4AA9D9",
+    "Netherlands": "#4AE0D0",
+    "Norway": "#FFBB78",
+    "New Zealand": "#6AD390",
+    "Poland": "#D3F26E",
+    "Portugal": "#FFB86A",
+    "Romania": "#C9E56A",
+    "Russian Federation": "#B59CFF",
+    "Slovakia": "#D8F07F",
+    "Serbia": "#F48AD8",
+
+    // Foreign
+    "Foreign": "#56C7B5",
+
+    // Remaining countries
+    "Turkey": "#FF7A7A",
+    "Ukraine": "#29B8D0",
+    "United States of America": "#2F62FF",
+    "United Kingdom": "#FF8C4A",
+    "Czech Republic": "#B57CFF",
+    "Montenegro": "#FF4F4F",
+    "Spain": "#FFA34C",
+    "Sweden": "#C08AFF",
+    "Switzerland": "#F48AC8",
+
+    // Final catch-all
+    "Other": "#c6c6c6ff"
+};
+
 
 
 

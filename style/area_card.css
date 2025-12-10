@@ -21,8 +21,24 @@
     transition: opacity 0.15s ease-in-out;
 }
 
+/* Restore hovered slice */
 .municipality-chart-slice:hover {
-    opacity: 0.8;
+    opacity: 1 !important;
+}
+
+/* Dim ALL slices when hovering anywhere on the chart */
+.municipality-chart-group:hover .municipality-chart-slice {
+    opacity: 0.3;
+}
+
+/* Restore hovered slice emoji */
+.slice-group:hover image {
+    opacity: 1 !important;
+}
+
+/* Dim ALL emojis when hovering chart */
+.municipality-chart-group:hover .slice-group image {
+    opacity: 0.3;
 }
 
 /* Emoji text inside slices */
@@ -58,9 +74,113 @@
     stroke: #999;
 }
 
+.pie-tooltip {
+    transition: opacity 0.1s ease;
+    z-index: 9999;
+}
 
 
 
 
 
 
+
+
+
+
+
+
+/* Municipality Card Wrapper */
+.municipality-card {
+    width: 100%;
+    margin: 0 auto;
+    padding: 10px 0;
+}
+
+/* Title (municipality name) */
+.municipality-card-title {
+    font-size: 28px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 4px;
+}
+
+/* Main tourist count */
+.municipality-card-main-text {
+    text-align: center;
+    margin-top: 6px;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+/* Secondary tourist count (smaller text) */
+.municipality-card-sub-text {
+    text-align: center;
+    font-size: 20px;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+/* Pie chart container */
+.municipality-card-chart {
+    margin-top: 10px;
+}
+
+/* Table container */
+.municipality-card-table {
+    margin-top: 10px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Wrapper */
+.statregion-card {
+    width: 100%;
+    margin: 0 auto;
+    padding: 10px 0;
+}
+
+/* Title */
+.statregion-card-title {
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 4px;
+}
+
+/* Main tourist line */
+.statregion-card-main-text {
+    text-align: center;
+    margin-top: 6px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* Secondary filtered count */
+.statregion-card-sub-text {
+    text-align: center;
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+/* Pie chart container */
+.statregion-card-chart {
+    margin-top: 10px;
+}
+
+/* Table container */
+.statregion-card-table {
+    margin-top: 10px;
+}

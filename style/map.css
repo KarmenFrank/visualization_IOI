@@ -55,7 +55,7 @@
 
   width: 90%;
   max-width: 600px; 
-  min-height: 400px;
+  min-height: 80%;
 
   background: rgba(255,255,255,0.95);
   border-radius: 20px;
@@ -68,10 +68,4 @@
   transition: transform 0.35s ease, opacity 0.35s ease;
 
   margin: auto;
-}
-
-
-.pie-tooltip {
-    transition: opacity 0.1s ease;
-    z-index: 9999;
 }

@@ -1,26 +1,24 @@
 import { state } from "./state.js";
-import { normalizeAreaName, normalizeNationalityName, calcAreaColor } from './common.js';
+import { normalizeAreaName, normalizeNationalityName, calcAreaColor, formatMonthString } from './common.js';
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
-import { getFilteredMunicipalityData, getFilteredStatRegionData, FLAG_CODE_MAP, getLocalFlagURL } from "./data.js";
+import { getFilteredMunicipalityData, getFilteredStatRegionData, FLAG_CODE_MAP, getLocalFlagURL, COUNTRY_COLORS } from "./data.js";
 
 function makePieChart(display_data) {
 
     const EMOJI_SIZE = 22;
-    const EMOJI_RADIUS = 0.7;
+    const EMOJI_RADIUS = 0.85;
 
     const total_sum = display_data.pie_chart_sum;
     const country_data = display_data.pie_chart_list;
 
-    const width = 150;
-    const height = 150;
+    const width = 350;
+    const height = width;
     const radius = Math.min(width, height) / 2;
 
     const wrapper = document.createElement("div");
     wrapper.className = "municipality-chart-wrapper";
 
-    // ===========================================================
     // NO DATA CASE
-    // ===========================================================
     if (total_sum === 0) {
         const svg = d3.create("svg")
             .attr("width", width)
@@ -49,15 +47,19 @@ function makePieChart(display_data) {
         return wrapper;
     }
 
-    // ===========================================================
     // PIE DATA
-    // ===========================================================
     const pieData = country_data.map(item => ({
         nationality: item.nationality,
         tourists: item.tourists,
         relativePercentage: item.relativePercentage,
         merged: item.merged || []
     }));
+
+    // Sort pie data into stable order based on keys in COUNTRY_COLORS
+    const order = Object.keys(COUNTRY_COLORS);
+    pieData.sort((a, b) =>
+        order.indexOf(a.nationality) - order.indexOf(b.nationality)
+    );
 
     const svg = d3.create("svg")
         .attr("width", width)
@@ -70,8 +72,6 @@ function makePieChart(display_data) {
         .attr("class", "municipality-chart-group")
         .attr("transform", `translate(${width / 2}, ${height / 2})`);
 
-    const color = d3.scaleOrdinal().range(d3.schemeCategory10);
-
     const pie = d3.pie()
         .sort(null)
         .value(d => d.relativePercentage);
@@ -80,22 +80,22 @@ function makePieChart(display_data) {
         .innerRadius(0)
         .outerRadius(radius);
 
-    // ===========================================================
     // TOOLTIP
-    // ===========================================================
     const tooltip = d3.select("body")
         .append("div")
         .attr("class", "municipality-chart-tooltip");
 
-    // ===========================================================
-    // DRAW PATHS
-    // ===========================================================
-    g.selectAll("path")
+    // GROUP EACH SLICE + EMOJI
+    const sliceGroups = g.selectAll(".slice-group")
         .data(pie(pieData))
-        .join("path")
+        .join("g")
+        .attr("class", "slice-group");
+
+    // DRAW PATHS
+    sliceGroups.append("path")
         .attr("class", "municipality-chart-slice")
         .attr("d", arc)
-        .attr("fill", d => color(d.data.nationality))
+        .attr("fill", d => COUNTRY_COLORS[d.data.nationality] || "#cccccc")
         .on("mousemove", (event, d) => {
             const pct = (d.data.relativePercentage * 100).toFixed(2);
             const tourists = d.data.tourists.toLocaleString();
@@ -120,50 +120,26 @@ function makePieChart(display_data) {
             tooltip.style("opacity", 0);
         });
 
-    // ===========================================================
-    // TWEMOJI FLAG ICONS INSIDE SLICES  🇺🇸
-    // ===========================================================
-    g.selectAll("image")
-    .data(pie(pieData))
-    .join("image")
-    .attr("href", d => getLocalFlagURL(d.data.nationality))
-    .attr("width", EMOJI_SIZE)
-    .attr("height", EMOJI_SIZE)
-    .attr("x", d => {
-        const [cx, cy] = arc.centroid(d);
+    // TWEMOJI FLAG ICONS
+    sliceGroups.append("image")
+        .attr("href", d => getLocalFlagURL(d.data.nationality))
+        .attr("width", EMOJI_SIZE)
+        .attr("height", EMOJI_SIZE)
+        .attr("pointer-events", "none")
+        .attr("x", d => {
+            const [cx, cy] = arc.centroid(d);
+            const angle = Math.atan2(cy, cx);
+            const r = EMOJI_RADIUS * radius;
+            return Math.cos(angle) * r - EMOJI_SIZE / 2;
+        })
+        .attr("y", d => {
+            const [cx, cy] = arc.centroid(d);
+            const angle = Math.atan2(cy, cx);
+            const r = EMOJI_RADIUS * radius;
+            return Math.sin(angle) * r - EMOJI_SIZE / 2;
+        });
 
-        // Angle from center
-        const angle = Math.atan2(cy, cx);
-
-        // Default centroid distance
-        const defaultR = Math.hypot(cx, cy);
-
-        // If EMOJI_RADIUS is null, use centroid.
-        // Otherwise use percentage of full radius.
-        const r = EMOJI_RADIUS === null
-            ? defaultR
-            : EMOJI_RADIUS * radius;
-
-        return Math.cos(angle) * r - EMOJI_SIZE / 2;
-    })
-    .attr("y", d => {
-        const [cx, cy] = arc.centroid(d);
-
-        const angle = Math.atan2(cy, cx);
-        const defaultR = Math.hypot(cx, cy);
-
-        const r = EMOJI_RADIUS === null
-            ? defaultR
-            : EMOJI_RADIUS * radius;
-
-        return Math.sin(angle) * r - EMOJI_SIZE / 2;
-    });
-
-
-
-    // ===========================================================
     // FINISH
-    // ===========================================================
     wrapper.appendChild(svg.node());
 
     const label = document.createElement("div");
@@ -173,7 +149,6 @@ function makePieChart(display_data) {
 
     return wrapper;
 }
-
 
 
 
@@ -310,21 +285,49 @@ function makeTouristTableStatRegion(display_data) {
 function makeMunicipalityCard(name) {
 
     const display_data = getFilteredMunicipalityData(name);
+    const month_string = formatMonthString(display_data.month_string);
     const display_name = display_data.display_name;
+    const total_tourists_no_filter = display_data.total_tourist_sum;
+    const total_tourists_filter = display_data.total_tourists_filtered;
 
     const wrapper = document.createElement("div");
+    wrapper.className = "municipality-card";
+    wrapper.id = `municipality-card-${name}`;
 
+    // Title
     const title = document.createElement("div");
-    title.className = "focused-title";
-    title.style.fontSize = "20px";
-    title.style.fontWeight = "bold";
-    title.style.textAlign = "center";
+    title.className = "municipality-card-title";
+    title.id = `municipality-card-title-${name}`;
     title.textContent = display_name;
     wrapper.appendChild(title);
 
-    wrapper.appendChild(makePieChart(display_data));
+    // Main tourist count text
+    const mainText = document.createElement("div");
+    mainText.className = "municipality-card-main-text";
+    mainText.id = `municipality-card-main-text-${name}`;
+    mainText.textContent =
+        `${total_tourists_no_filter.toLocaleString()} tourists visited the Municipality of ${display_name} in ${month_string}`;
+    wrapper.appendChild(mainText);
 
+    // Filtered tourist count (smaller text)
+    const subText = document.createElement("div");
+    subText.className = "municipality-card-sub-text";
+    subText.id = `municipality-card-sub-text-${name}`;
+    subText.textContent =
+        `${total_tourists_filter.toLocaleString()} tourists visiting from selected countries`;
+    wrapper.appendChild(subText);
+
+    // Pie chart
+    const chartWrapper = document.createElement("div");
+    chartWrapper.className = "municipality-card-chart";
+    chartWrapper.id = `municipality-card-chart-${name}`;
+    chartWrapper.appendChild(makePieChart(display_data));
+    wrapper.appendChild(chartWrapper);
+
+    // Table
     const tableContainer = document.createElement("div");
+    tableContainer.className = "municipality-card-table";
+    tableContainer.id = `municipality-card-table-${name}`;
     tableContainer.innerHTML = makeTouristTableMunicipality(display_data);
     wrapper.appendChild(tableContainer);
 
@@ -337,26 +340,61 @@ function makeStatRegionCard(name) {
 
     const display_data = getFilteredStatRegionData(name);
     const display_name = display_data.display_name;
-
+    const month_string = formatMonthString(display_data.month_string);
+    const total_tourists_no_filter = display_data.total_tourist_sum;
+    const total_tourists_filter = display_data.total_tourists_filtered;
 
     const wrapper = document.createElement("div");
+    wrapper.className = "statregion-card";
+    wrapper.id = `statregion-card-${name}`;
 
+    // Title
     const title = document.createElement("div");
-    title.className = "focused-title";
-    title.style.fontSize = "20px";
-    title.style.fontWeight = "bold";
-    title.style.textAlign = "center";
+    title.className = "statregion-card-title";
+    title.id = `statregion-card-title-${name}`;
     title.textContent = display_name;
     wrapper.appendChild(title);
 
-    wrapper.appendChild(makePieChart(display_data));
+    // Main tourist count
+    const mainText = document.createElement("div");
+    mainText.className = "statregion-card-main-text";
+    mainText.id = `statregion-card-main-text-${name}`;
+    mainText.textContent =
+        `${total_tourists_no_filter.toLocaleString()} tourists visited the statistical region of ${display_name} in ${month_string}`;
+    wrapper.appendChild(mainText);
 
+    // Filtered tourist count
+    const subText = document.createElement("div");
+    subText.className = "statregion-card-sub-text";
+    subText.id = `statregion-card-sub-text-${name}`;
+    subText.textContent =
+        `${total_tourists_filter.toLocaleString()} tourists visiting from selected countries`;
+    wrapper.appendChild(subText);
+
+    // Pie chart
+    const chartWrapper = document.createElement("div");
+    chartWrapper.className = "statregion-card-chart";
+    chartWrapper.id = `statregion-card-chart-${name}`;
+    chartWrapper.appendChild(makePieChart(display_data));
+    wrapper.appendChild(chartWrapper);
+
+    // Table
     const tableContainer = document.createElement("div");
+    tableContainer.className = "statregion-card-table";
+    tableContainer.id = `statregion-card-table-${name}`;
     tableContainer.innerHTML = makeTouristTableStatRegion(display_data);
     wrapper.appendChild(tableContainer);
 
     return wrapper;
 }
+
+
+
+
+
+
+
+
 
 export function generateFocusedAreaData(feature, container) {
     const isMunicipality = state.isMunicipalityView;
