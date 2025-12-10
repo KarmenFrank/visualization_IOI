@@ -1,9 +1,12 @@
 import { state } from "./state.js";
 import { normalizeAreaName, normalizeNationalityName, calcAreaColor } from './common.js';
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
+import { getFilteredMunicipalityData, getFilteredStatRegionData, FLAG_CODE_MAP, getLocalFlagURL } from "./data.js";
 
+function makePieChart(display_data) {
 
-function makeMunicipalityPieChart(display_data) {
+    const EMOJI_SIZE = 22;
+    const EMOJI_RADIUS = 0.7;
 
     const total_sum = display_data.pie_chart_sum;
     const country_data = display_data.pie_chart_list;
@@ -12,9 +15,8 @@ function makeMunicipalityPieChart(display_data) {
     const height = 150;
     const radius = Math.min(width, height) / 2;
 
-    // Wrapper DOM element (not string)
     const wrapper = document.createElement("div");
-    wrapper.style.textAlign = "center";
+    wrapper.className = "municipality-chart-wrapper";
 
     // ===========================================================
     // NO DATA CASE
@@ -23,22 +25,25 @@ function makeMunicipalityPieChart(display_data) {
         const svg = d3.create("svg")
             .attr("width", width)
             .attr("height", height)
+            .attr("class", "municipality-chart-svg nodata")
             .style("display", "block")
             .style("margin", "10px auto");
 
         const g = svg.append("g")
+            .attr("class", "municipality-chart-group")
             .attr("transform", `translate(${width / 2}, ${height / 2})`);
 
         g.append("circle")
+            .attr("class", "municipality-chart-nodata-circle")
             .attr("r", radius)
             .attr("fill", "#cccccc")
             .attr("stroke", "#999");
 
         wrapper.appendChild(svg.node());
+
         const label = document.createElement("div");
+        label.className = "municipality-chart-label";
         label.textContent = "No data";
-        label.style.fontSize = "12px";
-        label.style.marginTop = "4px";
         wrapper.appendChild(label);
 
         return wrapper;
@@ -57,10 +62,12 @@ function makeMunicipalityPieChart(display_data) {
     const svg = d3.create("svg")
         .attr("width", width)
         .attr("height", height)
+        .attr("class", "municipality-chart-svg")
         .style("display", "block")
         .style("margin", "10px auto");
 
     const g = svg.append("g")
+        .attr("class", "municipality-chart-group")
         .attr("transform", `translate(${width / 2}, ${height / 2})`);
 
     const color = d3.scaleOrdinal().range(d3.schemeCategory10);
@@ -74,26 +81,19 @@ function makeMunicipalityPieChart(display_data) {
         .outerRadius(radius);
 
     // ===========================================================
-    // TOOLTIP (HTML DIV)
+    // TOOLTIP
     // ===========================================================
     const tooltip = d3.select("body")
         .append("div")
-        .attr("class", "pie-tooltip")
-        .style("position", "absolute")
-        .style("padding", "6px 10px")
-        .style("background", "rgba(0,0,0,0.75)")
-        .style("color", "white")
-        .style("fontSize", "12px")
-        .style("borderRadius", "4px")
-        .style("pointerEvents", "none")
-        .style("opacity", 0);
+        .attr("class", "municipality-chart-tooltip");
 
     // ===========================================================
-    // DRAW WITH EVENT LISTENERS
+    // DRAW PATHS
     // ===========================================================
     g.selectAll("path")
         .data(pie(pieData))
         .join("path")
+        .attr("class", "municipality-chart-slice")
         .attr("d", arc)
         .attr("fill", d => color(d.data.nationality))
         .on("mousemove", (event, d) => {
@@ -121,14 +121,54 @@ function makeMunicipalityPieChart(display_data) {
         });
 
     // ===========================================================
-    // APPEND SVG + LABEL TO WRAPPER
+    // TWEMOJI FLAG ICONS INSIDE SLICES  🇺🇸
+    // ===========================================================
+    g.selectAll("image")
+    .data(pie(pieData))
+    .join("image")
+    .attr("href", d => getLocalFlagURL(d.data.nationality))
+    .attr("width", EMOJI_SIZE)
+    .attr("height", EMOJI_SIZE)
+    .attr("x", d => {
+        const [cx, cy] = arc.centroid(d);
+
+        // Angle from center
+        const angle = Math.atan2(cy, cx);
+
+        // Default centroid distance
+        const defaultR = Math.hypot(cx, cy);
+
+        // If EMOJI_RADIUS is null, use centroid.
+        // Otherwise use percentage of full radius.
+        const r = EMOJI_RADIUS === null
+            ? defaultR
+            : EMOJI_RADIUS * radius;
+
+        return Math.cos(angle) * r - EMOJI_SIZE / 2;
+    })
+    .attr("y", d => {
+        const [cx, cy] = arc.centroid(d);
+
+        const angle = Math.atan2(cy, cx);
+        const defaultR = Math.hypot(cx, cy);
+
+        const r = EMOJI_RADIUS === null
+            ? defaultR
+            : EMOJI_RADIUS * radius;
+
+        return Math.sin(angle) * r - EMOJI_SIZE / 2;
+    });
+
+
+
+    // ===========================================================
+    // FINISH
     // ===========================================================
     wrapper.appendChild(svg.node());
 
     const label = document.createElement("div");
+    label.className = "municipality-chart-label";
     label.textContent = "Tourists by nationality";
-    label.style.fontSize = "12px";
-    label.style.marginTop = "4px";
     wrapper.appendChild(label);
 
     return wrapper;
@@ -137,118 +177,75 @@ function makeMunicipalityPieChart(display_data) {
 
 
 
-function getFilteredMunicipalityData(normalized_mun_name){
-    const { CONFIG, touristDataMun, currentMonthIndex, months, nationalityTranslations } = state;
 
-    const month_string = months[currentMonthIndex];
-    const tourist_data_for_month = touristDataMun.find(item => item.month === month_string);
-    const mun_data = tourist_data_for_month.municipalities[normalized_mun_name];
+function makeTouristTableMunicipality(display_data) {
 
-    if (mun_data == null) {
-        throw new Error(`makeTouristTableMunicipality: mun_data is null for month: ${month_string}`);
+    const table_data = display_data.table_list;
+    const total_tourists = display_data.total_tourist_sum;
+
+    let rows = "";
+    for (const item of table_data) {
+        const nationality = item.nationality;
+        const tourists = item.tourists;
+        const percent = total_tourists > 0
+            ? ((tourists / total_tourists) * 100).toFixed(2) + "%"
+            : "0%";
+
+        rows += `
+            <tr>
+                <td style="padding: 8px 12px;">${nationality}</td>
+                <td style="padding: 8px 12px;">${tourists}</td>
+                <td style="padding: 8px 12px;">${percent}</td>
+            </tr>
+        `;
     }
 
-    const mun_display_name = mun_data.display_name;
-    const nationality_data_slovenian_names = mun_data.countries;
 
-    const selected =
-        state.selectedNationalities.size > 0
-            ? new Set(state.selectedNationalities)
-            : new Set(state.allNationalities);
+    return `
+    <div style="
+        margin-top: 18px;
+        max-width: 100%;
+        overflow-x: auto;
+        padding-bottom: 6px;
+        max-height: 300px;
+        overflow-y: auto;
+    ">
+        <table style="
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            min-width: 320px;
+        ">
+            <thead>
+                <tr style="
+                    background: #f0f0f0;
+                    position: sticky;
+                    top: 0;
+                    z-index: 1;
+                ">
+                    <th style="padding: 8px 12px; text-align: left;">Nationality</th>
+                    <th style="padding: 8px 12px; text-align: left;">Number of tourists</th>
+                    <th style="padding: 8px 12px; text-align: left;">Relative percentage</th>
+                </tr>
+            </thead>
 
-    const unselected = new Set(
-        [...state.allNationalities].filter(n => !selected.has(n))
-    );
+            <tbody>
+                ${rows}
+            </tbody>
+        </table>
+    </div>
+    `;
+}
 
-    const list_selected = nationality_data_slovenian_names
-        .filter(item => {
-            const slo_norm_name = normalizeNationalityName(item.name);
-            const eng_name = nationalityTranslations[slo_norm_name];
-            return selected.has(eng_name);
-        })
-        .map(item => ({
-            nationality: nationalityTranslations[normalizeNationalityName(item.name)],
-            tourists: item.data.data
-        }));
-
-    const list_unselected = nationality_data_slovenian_names
-        .filter(item => {
-            const slo_norm_name = normalizeNationalityName(item.name);
-            const eng_name = nationalityTranslations[slo_norm_name];
-            return unselected.has(eng_name);
-        })
-        .map(item => ({
-            nationality: nationalityTranslations[normalizeNationalityName(item.name)],
-            tourists: item.data.data
-        }));
-
-
-    const unselected_sum = list_unselected.reduce(
-        (acc, item) => acc + item.tourists,
-        0
-    );
-
-    const list_selected_sorted = [...list_selected].sort(
-        (a, b) => b.tourists - a.tourists
-    );
-
-    const final_list = [
-        ...list_selected_sorted,
-        ...(unselected.size > 0
-            ? [{ nationality: "Unselected", tourists: unselected_sum }]
-            : [])
-    ];
-
-    const totalTouristSum = final_list.reduce(
-        (sum, item) => sum + item.tourists,
-        0
-    );
-
-
-
-
-    const selectedTotal = list_selected_sorted.reduce(
-        (sum, item) => sum + item.tourists,
-        0
-    );
-    const threshold = selectedTotal * 0.02;
-
-    let otherSum = 0;
-    let mergedNames = [];
-
-    const pieChartBase = list_selected_sorted.reduce((acc, item) => {
-        if (item.tourists < threshold) {
-            otherSum += item.tourists;
-            mergedNames.push(item.nationality);
-        } else {
-            acc.push({
-                ...item,
-                relativePercentage: item.tourists / selectedTotal
-            });
-        }
-        return acc;
-    }, []);
-
-    if (otherSum > 0) {
-        pieChartBase.push({
-            nationality: "Other",
-            tourists: otherSum,
-            relativePercentage: otherSum / selectedTotal,
-            merged: mergedNames
-        });
-    }
-
-    return {
-        table_list: final_list,
-        total_tourist_sum: totalTouristSum,
-        pie_chart_list: pieChartBase,
-        pie_chart_sum : selectedTotal,
-        display_name : mun_display_name
-    };
+export function cleanUpPieChartTooltips() {
+    d3.selectAll(".pie-tooltip").remove();
 }
 
 
-function makeTouristTableMunicipality(display_data) {
+
+
+
+function makeTouristTableStatRegion(display_data) {
 
     const table_data = display_data.table_list;
     const total_tourists = display_data.total_tourist_sum;
@@ -310,9 +307,10 @@ function makeTouristTableMunicipality(display_data) {
 
 
 
-function makeMunicipalityCard(map_feature, name) {
+function makeMunicipalityCard(name) {
 
     const display_data = getFilteredMunicipalityData(name);
+    const display_name = display_data.display_name;
 
     const wrapper = document.createElement("div");
 
@@ -321,13 +319,11 @@ function makeMunicipalityCard(map_feature, name) {
     title.style.fontSize = "20px";
     title.style.fontWeight = "bold";
     title.style.textAlign = "center";
-    title.textContent = name;
+    title.textContent = display_name;
     wrapper.appendChild(title);
 
-    // Pie chart
-    wrapper.appendChild(makeMunicipalityPieChart(display_data));
+    wrapper.appendChild(makePieChart(display_data));
 
-    // Table (string → HTML)
     const tableContainer = document.createElement("div");
     tableContainer.innerHTML = makeTouristTableMunicipality(display_data);
     wrapper.appendChild(tableContainer);
@@ -338,18 +334,29 @@ function makeMunicipalityCard(map_feature, name) {
 
 
 function makeStatRegionCard(name) {
-    return `
-        <div class="focused-title" style="font-size: 20px; font-weight: bold; text-align: center;">
-        TEMP REGION
-        </div>
-        <div class="focused-info" style="text-align: center;">
-        <p>Population: 12,345</p>
-        <p>Area: 678 km²</p>
-        <p>Status: Test Info</p>
-        </div>
-    `;
-}
 
+    const display_data = getFilteredStatRegionData(name);
+    const display_name = display_data.display_name;
+
+
+    const wrapper = document.createElement("div");
+
+    const title = document.createElement("div");
+    title.className = "focused-title";
+    title.style.fontSize = "20px";
+    title.style.fontWeight = "bold";
+    title.style.textAlign = "center";
+    title.textContent = display_name;
+    wrapper.appendChild(title);
+
+    wrapper.appendChild(makePieChart(display_data));
+
+    const tableContainer = document.createElement("div");
+    tableContainer.innerHTML = makeTouristTableStatRegion(display_data);
+    wrapper.appendChild(tableContainer);
+
+    return wrapper;
+}
 
 export function generateFocusedAreaData(feature, container) {
     const isMunicipality = state.isMunicipalityView;
@@ -359,7 +366,7 @@ export function generateFocusedAreaData(feature, container) {
     container.innerHTML = "";
 
     if (isMunicipality) {
-        container.appendChild(makeMunicipalityCard(feature, name));
+        container.appendChild(makeMunicipalityCard(name));
     } else {
         container.appendChild(makeStatRegionCard(name));
     }
@@ -377,5 +384,6 @@ export function updateAreaCard() {
     if (!isOpen) return;
 
     card.innerHTML = "";
+    cleanUpPieChartTooltips();
     generateFocusedAreaData(state.selectedArea, card);
 }

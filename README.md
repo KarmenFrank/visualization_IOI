@@ -31,7 +31,7 @@
 **BUGS**
 - when timeline playing and unfocusing card - error but non fatal (make handling for it)
 - possible bug of some municipalities just not having any tourists OR they just really that dead - investigate pipeline (check month where its all 0, check json for sanity check)
-
+- wrong capitalization on names - Ivančna gorica instead of Ivančna Gorica etc.
 
 **DONE**
 - hook up data for statistical regions on map
@@ -42,3 +42,5 @@
 
 
 
+Emoji graphics by Twitter (Twemoji)
+Licensed under CC-BY 4.0: https://twemoji.twitter.com

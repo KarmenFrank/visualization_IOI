@@ -1,0 +1,66 @@
+/* Container */
+.municipality-chart-wrapper {
+    text-align: center;
+    margin: 0 auto;
+}
+
+/* Main SVG */
+.municipality-chart-svg {
+    display: block;
+    margin: 10px auto;
+}
+
+/* Group wrapper */
+.municipality-chart-group {
+    font-family: inherit;
+}
+
+/* Pie slices */
+.municipality-chart-slice {
+    cursor: pointer;
+    transition: opacity 0.15s ease-in-out;
+}
+
+.municipality-chart-slice:hover {
+    opacity: 0.8;
+}
+
+/* Emoji text inside slices */
+.municipality-chart-emoji {
+    pointer-events: none;
+    font-size: 20px;
+    font-family: Segoe UI Emoji, Apple Color Emoji, Noto Color Emoji, sans-serif;
+}
+
+/* Tooltip */
+.municipality-chart-tooltip {
+    position: absolute;
+    padding: 6px 10px;
+    background: rgba(0,0,0,0.75);
+    color: white;
+    font-size: 12px;
+    border-radius: 4px;
+    pointer-events: none;
+    opacity: 0;
+    z-index: 9999;
+    transition: opacity 0.1s ease-out;
+}
+
+/* Label under the chart */
+.municipality-chart-label {
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+/* No-data circle */
+.municipality-chart-nodata-circle {
+    fill: #ccc;
+    stroke: #999;
+}
+
+
+
+
+
+
+

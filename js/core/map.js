@@ -3,7 +3,8 @@ import { normalizeAreaName, calcAreaColor } from './common.js';
 import { clearSearch } from './search.js';
 import { clearFilters, copyTouristData } from './filter.js';
 import { setGraphRegion, setGraphTitle } from './graph.js';
-import { generateFocusedAreaData } from './area_card.js';
+import { generateFocusedAreaData, cleanUpPieChartTooltips } from './area_card.js';
+
 
 export function initMap() {
   const { CONFIG } = state;
@@ -210,6 +211,7 @@ export function unfocusArea(calledBySearch = false) {
   wrapper.style.transform = "none";
 
   svgOverlay.innerHTML = "";
+  cleanUpPieChartTooltips();
 
   const card = panel.querySelector(".panel-card");
   if (card) {
