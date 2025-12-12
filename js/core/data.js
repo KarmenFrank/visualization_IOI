@@ -2,16 +2,19 @@ import { state } from './state.js';
 import { normalizeNationalityName } from './common.js';
 
 export async function loadTouristData() {
-  const [munRes, srRes, munTotal, srTotal, nationalityTranslations] = await Promise.all([
+  const [munRes1, munRes2, srRes, munTotal, srTotal, nationalityTranslations] = await Promise.all([
     fetch("data/tourist_data_grouped_ENG.json"),
+    fetch("data/tourist_data_grouped_ENG_2.json"),
     fetch("data/sr_data_grouped.json"),
     fetch("data/tourist_data_grouped_total.json"),
     fetch("data/sr_data_grouped_total.json"),
     fetch("data/nationality_translations.json")
   ]);
-  
 
-  state.touristDataMun = await munRes.json();
+  const mun1 = await munRes1.json();
+  const mun2 = await munRes2.json();
+  
+  state.touristDataMun = [...mun1, ...mun2];
   state.touristDataSr = await srRes.json();
   state.touristDataMunTotal = await munTotal.json();
   state.touristDataSrTotal = await srTotal.json();

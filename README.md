@@ -39,6 +39,7 @@
 - fixed color mapping for showing counts
 - touristData contains only total values - faster switching
 - hook up nationality filtering to displaying counts with map -> add in applyNationalityFilter function (filter.js), three cases (also depends on isMunicipalityView)
+- fixed display names
 
 
 
