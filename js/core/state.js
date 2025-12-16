@@ -1,6 +1,7 @@
 export const state = {
   map: null,
   geoLayer: null,
+  hoveredLayer: null,
 
   municipalityData: null,
   regionData: null,

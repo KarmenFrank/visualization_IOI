@@ -37,6 +37,8 @@
   cursor: pointer;
   appearance: none;
   -webkit-appearance: none;
+  padding: 12px 0;
+  margin: -12px 0; 
 }
 
 /* Black bar track */
@@ -141,6 +143,18 @@
 .timeline-tick-label {
   pointer-events: none;
 }
+
+#timeline,
+#timeline-label,
+#timeline-ticks,
+.timeline-tick,
+.timeline-tick-label {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
 
 /* Timeline label */
 .timeline-label {

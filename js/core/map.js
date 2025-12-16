@@ -1,9 +1,10 @@
 import { state } from './state.js';
-import { normalizeAreaName, calcAreaColor } from './common.js';
+import { normalizeAreaName, calcAreaColor, normalizeNationalityName } from './common.js';
 import { clearSearch } from './search.js';
 import { clearFilters, copyTouristData } from './filter.js';
 import { setGraphRegion, setGraphTitle } from './graph.js';
 import { generateFocusedAreaData, cleanUpPieChartTooltips } from './area_card.js';
+import { getTouristsSums } from './data.js';
 
 
 export function initMap() {
@@ -38,6 +39,62 @@ export function initMap() {
 
 
 
+
+
+
+function getAreaTooltipContent(feature) {
+  const { touristData, currentMonthIndex, isMunicipalityView } = state;
+
+  const nameRaw = feature.properties.OB_UIME || feature.properties.SR_UIME;
+  if (!nameRaw) return "";
+
+  const norm_name = normalizeAreaName(nameRaw);
+
+  const monthData = touristData?.[currentMonthIndex];
+  if (!monthData) return `<strong>${nameRaw}</strong>`;
+
+  const areaData = isMunicipalityView ? monthData.municipalities : monthData.regions;
+  const entry = areaData?.[norm_name];
+
+  if (!entry) return `<strong>${nameRaw}</strong>`;
+
+  const sums = getTouristsSums(norm_name);
+
+  return `
+    <strong>${nameRaw}</strong><br>
+    Selected overnight stays: ${sums.selectedTouristSum}<br>
+    Total overnight stays: ${sums.totalTouristSum}
+  `;
+  }
+
+
+
+
+
+
+
+export function clearMapTooltips() {
+  if (!state.geoLayer) return;
+
+  state.geoLayer.eachLayer(layer => {
+    if (layer.isTooltipOpen && layer.isTooltipOpen()) {
+      layer.closeTooltip();
+    }
+  });
+}
+
+export function refreshHoveredTooltip() {
+  const layer = state.hoveredLayer;
+  if (!layer) return;
+
+  if (layer.isTooltipOpen && layer.isTooltipOpen()) {
+    layer.closeTooltip();
+    layer.openTooltip();
+  }
+}
+
+
+
 export function updateMapShape() {
   const { map, CONFIG, isMunicipalityView } = state;
   const data = isMunicipalityView ? state.municipalityData : state.regionData;
@@ -45,11 +102,69 @@ export function updateMapShape() {
   if (!map || !data) return;
   if (state.geoLayer) map.removeLayer(state.geoLayer);
 
+  const NORMAL_OPACITY = CONFIG.AREA_STYLE.fillOpacity;
+
   state.geoLayer = L.geoJSON(data, {
     style: CONFIG.AREA_STYLE,
     onEachFeature: (feature, layer) => {
 
+      // Tooltip
+      layer.bindTooltip(
+        () => getAreaTooltipContent(feature),
+        {
+          direction: "right",
+          sticky: false,
+          opacity: 0.95,
+          offset: L.point(12, 0),
+          className: "map-tooltip"
+        }
+      );
+
+      // Disable tooltip when focused
+      layer.on("tooltipopen", () => {
+        if (state.selectedArea) layer.closeTooltip();
+      });
+
+      // Hover highlight: dim all other areas
+      layer.on("mouseover", () => {
+        if (state.selectedArea) return;
+
+        state.hoveredLayer = layer;
+        layer.openTooltip();
+
+        state.geoLayer.eachLayer(other => {
+          if (other === layer) {
+            other.setStyle({
+              weight: 3,
+              fillOpacity: NORMAL_OPACITY
+            });
+            other.bringToFront();
+          } else {
+            other.setStyle({
+              fillOpacity: NORMAL_OPACITY
+            });
+          }
+        });
+      });
+
+      layer.on("mouseout", () => {
+        if (state.selectedArea) return;
+
+        state.hoveredLayer = null;
+        layer.closeTooltip();
+
+        state.geoLayer.eachLayer(other => {
+          other.setStyle({
+            weight: CONFIG.AREA_STYLE.weight,
+            fillOpacity: NORMAL_OPACITY
+          });
+        });
+      });
+
+
+      // Click
       layer.on("click", (e) => {
+        clearMapTooltips();
         e.originalEvent.stopPropagation();
         if (state.clickLocked) return;
         handleAreaClick(feature);
@@ -138,6 +253,7 @@ function toggleView() {
   updateMapColors();
 
   // Clear filters:
+  clearMapTooltips();
   clearFilters();
 }
 

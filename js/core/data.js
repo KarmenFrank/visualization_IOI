@@ -276,6 +276,82 @@ export function getFilteredStatRegionData(normalized_region_name){
 }
 
 
+
+
+
+
+
+
+
+export function getTouristsSums(normalized_name) {
+  const { touristDataMun, touristDataSr, currentMonthIndex, months, nationalityTranslations, isMunicipalityView } = state;
+
+  const month_string = months[currentMonthIndex];
+  const tourist_data_for_month = isMunicipalityView ? touristDataMun.find(item => item.month === month_string) : touristDataSr.find(item => item.month === month_string);
+  const area_data =  isMunicipalityView ? tourist_data_for_month.municipalities[normalized_name] : tourist_data_for_month.regions[normalized_name];
+
+  if (area_data == null) {
+    throw new Error(
+      `getTouristsSums: mun_data is null for month: ${month_string}`
+    );
+  }
+
+  const nationality_data_slovenian_names = area_data.countries;
+
+  const selected =
+    state.selectedNationalities.size > 0
+      ? new Set(state.selectedNationalities)
+      : new Set(state.allNationalities);
+
+  const unselected = new Set(
+    [...state.allNationalities].filter(n => !selected.has(n))
+  );
+
+  const list_selected = nationality_data_slovenian_names
+    .filter(item => {
+      const slo_norm_name = normalizeNationalityName(item.name);
+      const eng_name = nationalityTranslations[slo_norm_name];
+      return selected.has(eng_name);
+    })
+    .map(item => ({
+      nationality: nationalityTranslations[normalizeNationalityName(item.name)],
+      tourists: item.data.data
+    }));
+
+  const list_unselected = nationality_data_slovenian_names
+    .filter(item => {
+      const slo_norm_name = normalizeNationalityName(item.name);
+      const eng_name = nationalityTranslations[slo_norm_name];
+      return unselected.has(eng_name);
+    })
+    .map(item => ({
+      nationality: nationalityTranslations[normalizeNationalityName(item.name)],
+      tourists: item.data.data
+    }));
+
+  const selectedTouristSum = list_selected.reduce(
+    (sum, item) => sum + item.tourists,
+    0
+  );
+
+  const unselected_sum = list_unselected.reduce(
+    (sum, item) => sum + item.tourists,
+    0
+  );
+
+  const totalTouristSum = selectedTouristSum + unselected_sum;
+
+  return {
+    selectedTouristSum,
+    totalTouristSum
+  };
+}
+
+
+
+
+
+
 export const FLAG_CODE_MAP = {
     // --- Standard countries ---
     "Australia": "1f1e6-1f1fa",

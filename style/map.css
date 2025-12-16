@@ -70,3 +70,8 @@
 
   margin: auto;
 }
+
+
+.leaflet-interactive:focus {
+  outline: none;
+}
