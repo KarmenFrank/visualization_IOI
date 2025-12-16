@@ -59,7 +59,7 @@ export const state = {
   
   CONFIG: {
     INITIAL_VIEW: { center: [46.15, 14.995], zoom: 8.95 },
-    MAP_STYLE: { background: "#a5e1f0ff" },
+    MAP_STYLE: { background: "#d6eef5ff" },
     AREA_STYLE: { color: "#555", weight: 1, fillColor: "#e0e0e0", fillOpacity: 1.0 },
     FOCUSED_STYLE: { color: "#000", weight: 2, fillColor: "#fff", fillOpacity: 1.0 },
     BLUR_EFFECT: { blur: "20px", brightness: 0.9, duration: 0.3 },

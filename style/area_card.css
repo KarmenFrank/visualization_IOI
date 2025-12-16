@@ -60,6 +60,7 @@
     opacity: 0;
     z-index: 9999;
     transition: opacity 0.1s ease-out;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 /* Label under the chart */
