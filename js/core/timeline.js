@@ -1,7 +1,7 @@
 import { state } from './state.js';
 import { updateMapColors, refreshHoveredTooltip } from './map.js';
 import { setGraphIndex } from './graph.js';
-import { updateAreaCard } from './area_card.js';
+import { updateAreaCard, cleanUpPieChartTooltips } from './area_card.js';
 
 
 // calls this whenever the currentMonthIndex changes
@@ -56,6 +56,7 @@ export function populateTimelineWithMonths() {
     updateAreaCard();
     updateGraphMarkerFromTimeline();
     refreshHoveredTooltip();
+    cleanUpPieChartTooltips();
   });
 
 
@@ -156,6 +157,7 @@ export function playLoop() {
   updateMapColors();
   updateTimeline();
   updateAreaCard();
+  cleanUpPieChartTooltips();
   updateGraphMarkerFromTimeline();
   refreshHoveredTooltip();
 }

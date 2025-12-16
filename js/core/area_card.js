@@ -3,6 +3,23 @@ import { normalizeAreaName, normalizeNationalityName, calcAreaColor, formatMonth
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 import { getFilteredMunicipalityData, getFilteredStatRegionData, FLAG_CODE_MAP, getLocalFlagURL, COUNTRY_COLORS } from "./data.js";
 
+
+function getPieTooltip() {
+    let tooltip = d3.select(".municipality-chart-tooltip");
+
+    if (tooltip.empty()) {
+        tooltip = d3.select("body")
+            .append("div")
+            .attr("class", "municipality-chart-tooltip")
+            .style("opacity", 0)
+            .style("pointer-events", "none");
+    }
+
+    return tooltip;
+}
+
+
+
 function makePieChart(display_data) {
 
     const EMOJI_SIZE = 22;
@@ -81,9 +98,8 @@ function makePieChart(display_data) {
         .outerRadius(radius);
 
     // TOOLTIP
-    const tooltip = d3.select("body")
-        .append("div")
-        .attr("class", "municipality-chart-tooltip");
+    const tooltip = getPieTooltip();
+
 
     // GROUP EACH SLICE + EMOJI
     const sliceGroups = g.selectAll(".slice-group")
@@ -213,8 +229,10 @@ function makeTouristTableMunicipality(display_data) {
 }
 
 export function cleanUpPieChartTooltips() {
-    d3.selectAll(".pie-tooltip").remove();
+    d3.selectAll(".municipality-chart-tooltip")
+        .style("opacity", 0);
 }
+
 
 
 
