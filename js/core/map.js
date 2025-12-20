@@ -32,6 +32,8 @@ export function initMap() {
   });
 
   document.getElementById("toggle-btn").addEventListener("click", toggleView);
+
+  createLegend();
 }
 
 
@@ -482,5 +484,47 @@ function drawFocusedArea(feature) {
       () => (state.clickLocked = false),
       CONFIG.ENLARGE_EFFECT.duration * 1000
     );
+  });
+}
+
+
+
+function createLegend() {
+  const gradient = document.querySelector(".legend-gradient");
+  const labels = document.querySelectorAll(".legend-labels div");
+
+  if (!gradient || !labels.length) {
+    console.error("Legend elements not found");
+    return;
+  }
+
+  const { MIN_VALUE, MAX_VALUE } = state.CONFIG.TOURIST_COLORS;
+
+  // Gradient:
+  const exponent = 0.5;
+  const steps = 30;
+  const stops = [];
+
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    const value = MIN_VALUE + Math.pow(t, 1/exponent) * (MAX_VALUE - MIN_VALUE);
+
+    const color = calcAreaColor({
+      countries: [{ countryNameEnglish: "Total", data: { data: value } }]
+    });
+
+    stops.push(`${color} ${t * 100}%`);
+  }
+
+  gradient.style.background = `linear-gradient(to top, ${stops.join(",")})`;
+
+  // Label positioning:
+  labels.forEach(label => {
+    const value = Number(label.dataset.value);
+    let t = (value - MIN_VALUE) / (MAX_VALUE - MIN_VALUE);
+    t = Math.min(1, Math.max(0, t));
+    t = Math.pow(t, exponent);
+
+    label.style.top = `${(1 - t) * 100}%`;
   });
 }
