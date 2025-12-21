@@ -25,7 +25,7 @@
   display: block;
 }
 
-/* Make axes and title look cleaner (D3 creates these classes) */
+/* Make axes and title look cleaner*/
 #overnight-graph .x-axis text,
 #overnight-graph .y-axis text,
 #overnight-graph .graph-title {
@@ -62,3 +62,51 @@
 #graph-window-toggle:hover {
   background: #acacac;
 }
+
+.background-intervals rect {
+    pointer-events: none;
+}
+
+#graph-legend {
+    display: flex;
+    gap: 14px;
+    font-size: 15px;
+    font-family: Arial, Helvetica, sans-serif;
+    align-items: center;
+
+    position: absolute;
+    bottom: 8px;
+    left: 12px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.legend-swatch {
+    width: 18px;
+    height: 12px;
+    border-radius: 3px;
+    border: 1px solid #aaa;
+    box-sizing: border-box;
+}
+
+/* Summer: nežno rumeno ozadje */
+.legend-swatch.summer {
+    background: rgba(255, 200, 0, 0.25);
+}
+
+/* Covid: poševne rdeče črte */
+.legend-swatch.covid {
+    background:
+        repeating-linear-gradient(
+            45deg,
+            rgba(200, 0, 0, 0.6) 0px,
+            rgba(200, 0, 0, 0.6) 1px,
+            transparent 1px,
+            transparent 5px
+        );
+}
+

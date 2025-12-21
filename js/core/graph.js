@@ -6,7 +6,7 @@ let svg, xScale, yScale, lineGen;
 const width = 600;
 const height = 300;
 const margin = { top: 70, right: 40, bottom: 40, left: 80 };
-const marginTitle = { top: 20, left: 50 };
+const marginTitle = { top: -20, left: 20 };
 
 const WINDOW_SIZE = 12; // months visible at once
 let currentIndex = 0;
@@ -15,15 +15,15 @@ let currentIndex = 0;
 let currentSeries = [];
 
 // "slovenija" by default when nothing is selected
-let currentAreaKey = "slovenija";
-let lastAreaKey = "slovenija";
+let currentAreaKey = "slovenia";
+let lastAreaKey = "slovenia";
 
 let titleText;
 
 // UI: false = show 12-month window, true = show full period
 let showFullWindow = false;
 
-// Tooltip (once)
+// Tooltip
 const tooltip = d3.select("body")
     .append("div")
     .attr("class", "graph-tooltip")
@@ -35,6 +35,29 @@ const tooltip = d3.select("body")
     .style("font-size", "12px")
     .style("pointer-events", "none")
     .style("opacity", 0);
+
+const BACKGROUND_INTERVALS = [
+    // poletna sezona (ponavljajoče)
+    {
+        type: "summer",
+        from: { month: 6 },
+        to: { month: 9 },
+        color: "rgba(255, 200, 0, 0.15)"
+    },
+
+    // covid
+    {
+        type: "covid",
+        from: { year: 2020, month: 3 },
+        to: { year: 2020, month: 5 }
+    },
+    {
+        type: "covid",
+        from: { year: 2020, month: 9 },
+        to: { year: 2021, month: 5 }
+    }
+];
+
 
 // --------------- HELPERS ---------------
 
@@ -131,15 +154,94 @@ function ensureGraphToggleButton() {
     btn = document.createElement("button");
     btn.id = "graph-window-toggle";
     btn.type = "button";
-    btn.textContent = "Show full period";
+    btn.textContent = "Show whole timeline";
     container.appendChild(btn);
 
     btn.addEventListener("click", () => {
         showFullWindow = !showFullWindow;
-        btn.textContent = showFullWindow ? "Show last 12 months" : "Show full period";
+        btn.textContent = showFullWindow ? "Show only 12 months" : "Show whole timeline";
         setGraphIndex(currentIndex); // re-render at current month
     });
 }
+
+function drawBackgroundIntervals(series) {
+    const g = svg.selectAll(".background-intervals")
+        .data([null])
+        .join("g")
+        .attr("class", "background-intervals")
+        .attr("clip-path", "url(#plot-area-clip)");
+
+    g.selectAll("rect").remove();
+
+    const yTop = margin.top;
+    const heightRect = height - margin.top - margin.bottom;
+
+    BACKGROUND_INTERVALS.forEach(interval => {
+
+        if (interval.type === "summer") {
+            // ponavljajoče se za vsako leto v seriji
+            const years = [...new Set(series.map(d => d.date.getFullYear()))];
+
+            years.forEach(year => {
+                const start = new Date(year, interval.from.month - 1, 1);
+                const end = new Date(year, interval.to.month, 0);
+
+                g.append("rect")
+                    .attr("x", xScale(start))
+                    .attr("y", yTop)
+                    .attr("width", xScale(end) - xScale(start))
+                    .attr("height", heightRect)
+                    .attr("fill", interval.color);
+            });
+
+        } else {
+            // enkratni interval (covid)
+            const start = new Date(interval.from.year, interval.from.month - 1, 1);
+            const end = new Date(interval.to.year, interval.to.month, 0);
+
+            g.append("rect")
+                .attr("x", xScale(start))
+                .attr("y", yTop)
+                .attr("width", xScale(end) - xScale(start))
+                .attr("height", heightRect)
+                .attr("fill", "url(#covid-hatch)");
+        }
+    });
+
+    svg.select(".top-layer").raise();
+}
+
+
+function ensureGraphLegend() {
+    const container = d3.select("#graph-container");
+    if (container.empty()) return;
+
+    // Če legenda že obstaja, ne delaj še ene
+    if (!container.select("#graph-legend").empty()) return;
+
+    const legend = container.append("div")
+        .attr("id", "graph-legend");
+
+    const items = [
+        { key: "summer", label: "Summer tourist season" },
+        { key: "covid", label: "COVID-19 restrictions" }
+    ];
+
+    const row = legend.selectAll(".legend-item")
+        .data(items)
+        .enter()
+        .append("div")
+        .attr("class", "legend-item");
+
+    row.append("span")
+        .attr("class", d => `legend-swatch ${d.key}`);
+
+    row.append("span")
+        .attr("class", "legend-label")
+        .text(d => d.label);
+}
+
+
 
 // --------------- INIT SVG ---------------
 
@@ -167,22 +269,12 @@ export function initGraph() {
         .attr("stroke-width", 2)
         .attr("opacity", 1);
 
-    // circle element
-    svg.append("circle")
-        .attr("class", "current-point")
-        .attr("r", 6)
-        .attr("fill", "#95f1bbff")
-        .attr("stroke", "white")
-        .attr("stroke-width", 1.5)
-        .style("pointer-events", "none")
-        .style("display", "none");
-
     // Title + subtitle
     svg.append("text")
         .attr("class", "graph-title")
         .attr("x", marginTitle.left)
         .attr("y", marginTitle.top)
-        .attr("font-size", 20)
+        .attr("font-size", 16)
         .attr("font-weight", "700")
         .text("Overnight stays");
 
@@ -190,7 +282,7 @@ export function initGraph() {
         .attr("class", "graph-subtitle")
         .attr("x", marginTitle.left)
         .attr("y", marginTitle.top + 20)
-        .attr("font-size", 16)
+        .attr("font-size", 14)
         .attr("fill", "#555")
         .text("Slovenia");
 
@@ -205,8 +297,46 @@ export function initGraph() {
         .attr("fill", "#333")
         .text("Overnight stays (count)");
 
-    // Add the toggle button near the graph (absolute positioned via CSS)
+    //clip the background intervals so that trhey don't fall outside the graph axes
+    svg.append("defs")
+        .append("clipPath")
+        .attr("id", "plot-area-clip")
+        .append("rect")
+        .attr("x", margin.left)
+        .attr("y", margin.top)
+        .attr("width", width - margin.left - margin.right)
+        .attr("height", height - margin.top - margin.bottom);
+
+    const defs = svg.select("defs").empty() ? svg.append("defs") : svg.select("defs");
+
+    defs.append("pattern")
+        .attr("id", "covid-hatch")
+        .attr("patternUnits", "userSpaceOnUse")
+        .attr("width", 6)
+        .attr("height", 6)
+        .attr("patternTransform", "rotate(45)")
+        .append("line")
+        .attr("x1", 0)
+        .attr("y1", 0)
+        .attr("x2", 0)
+        .attr("y2", 8)
+        .attr("stroke", "rgba(200, 0, 0, 0.6)")
+        .attr("stroke-width", 1);
+
+    const topLayer = svg.append("g").attr("class", "top-layer");
+
+    topLayer.append("circle")
+        .attr("class", "current-point")
+        .attr("r", 6)
+        .attr("fill", "#22eb76ff")
+        .attr("stroke", "white")
+        .attr("stroke-width", 1.5)
+        .style("pointer-events", "none")
+        .style("display", "none");
+
     ensureGraphToggleButton();
+    ensureGraphLegend();
+
 }
 
 // --------------- INITIAL DATA HOOK ---------------
@@ -246,6 +376,7 @@ export function setGraphIndex(idx) {
         .nice()
         .range([height - margin.bottom, margin.top]);
 
+    drawBackgroundIntervals(currentSeries);
     // animated axes
     const axisT = svg.transition().duration(500).ease(d3.easeCubicOut);
 
@@ -366,3 +497,6 @@ export function setGraphTitle(label) {
     if (!titleText) return;
     titleText.text(label || "Slovenia");
 }
+
+
+
