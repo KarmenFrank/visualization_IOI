@@ -12,8 +12,7 @@
 # TODO
 - **add legend** (could be possible to shrink graph card upwards and add legend bellow)
 - add **limited** panning and zooming on the map
-
-
+- add tooltips on map (shows name of region/municipality when hovering) :D
 - if possible, make the timeline easier to click on
 
 - show important events on global graph -> korona 1. val, 2. val etc., **poletne sezone**
