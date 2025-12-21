@@ -1,16 +1,16 @@
 #graph-container {
-  
-  height: 80vh;
-  flex: 0 0 420px;
+  flex: 1 1 0%;
   margin-left: 0px;
 
   box-sizing: border-box;
   padding: 12px 12px;
 
-  background: #d6eef5ff;
-  border: 1px solid #dddddd;
-  border-radius: 16px;
-  box-shadow: 0 8px 28px rgba(0,0,0,0.10);
+  /* background: #d6eef5ff;
+  border: 1px solid #dddddd; */
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  /* box-shadow: 0 8px 28px rgba(0,0,0,0.10); */
 
   display: flex;
   flex-direction: column;

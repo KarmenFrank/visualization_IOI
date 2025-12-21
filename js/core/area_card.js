@@ -112,6 +112,9 @@ function makePieChart(display_data) {
         .attr("class", "municipality-chart-slice")
         .attr("d", arc)
         .attr("fill", d => COUNTRY_COLORS[d.data.nationality] || "#cccccc")
+        .attr("stroke", "#ffffff")
+        .attr("stroke-width", 2)
+        .attr("stroke-linejoin", "round")
         .on("mousemove", (event, d) => {
             const pct = (d.data.relativePercentage * 100).toFixed(2);
             const tourists = d.data.tourists.toLocaleString();
