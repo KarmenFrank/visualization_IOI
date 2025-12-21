@@ -6,24 +6,78 @@ import { setGraphRegion, setGraphTitle } from './graph.js';
 import { generateFocusedAreaData, cleanUpPieChartTooltips } from './area_card.js';
 import { getTouristsSums } from './data.js';
 
-
 export function initMap() {
   const { CONFIG } = state;
 
+  const MIN_ZOOM = 9;
+  const MAX_ZOOM = 11;
+  const INITIAL_CENTER = CONFIG.INITIAL_VIEW.center;
+
   state.map = L.map("map", {
-    center: CONFIG.INITIAL_VIEW.center,
-    zoom: CONFIG.INITIAL_VIEW.zoom,
-    minZoom: CONFIG.INITIAL_VIEW.zoom,
-    maxZoom: CONFIG.INITIAL_VIEW.zoom,
+    center: INITIAL_CENTER,
+    zoom: MIN_ZOOM,
+    minZoom: MIN_ZOOM,
+    maxZoom: MAX_ZOOM,
+
     zoomControl: false,
-    dragging: false,
+    dragging: true,
     scrollWheelZoom: false,
-    doubleClickZoom: false,
-    boxZoom: false,
-    keyboard: false,
-    tap: false,
-    touchZoom: false
+    doubleClickZoom: true,
+    keyboard: true,
+    touchZoom: true,
+    inertia: false
   });
+
+  // --- Custom zoom control ---
+  const ZoomHomeControl = L.Control.extend({
+    options: { position: "topleft" },
+    onAdd(map) {
+      const c = L.DomUtil.create("div", "leaflet-bar leaflet-control");
+      const zin = L.DomUtil.create("a", "", c);
+      const zout = L.DomUtil.create("a", "", c);
+
+      zin.innerHTML = "+";
+      zout.innerHTML = "−";
+      zin.href = zout.href = "#";
+
+      L.DomEvent.disableClickPropagation(c);
+
+      L.DomEvent.on(zin, "click", e => {
+        L.DomEvent.preventDefault(e);
+        if (map.getZoom() < MAX_ZOOM) {
+          map.zoomIn(1);
+        }
+      });
+
+      L.DomEvent.on(zout, "click", e => {
+        L.DomEvent.preventDefault(e);
+        const z = map.getZoom();
+
+        if (z - 1 <= MIN_ZOOM) {
+          map.flyTo(INITIAL_CENTER, MIN_ZOOM, {
+            duration: 0.4,
+            easeLinearity: 0.25
+          });
+        } else {
+          map.zoomOut(1);
+        }
+      });
+
+      return c;
+    }
+  });
+
+  state.map.addControl(new ZoomHomeControl());
+
+  state.map.on("zoomend", () => {
+    if (state.map.getZoom() === MIN_ZOOM) {
+      state.map.dragging.disable();
+    } else {
+      state.map.dragging.enable();
+    }
+  });
+
+  state.map.dragging.disable();
 
   L.DomUtil.get("map").style.background = CONFIG.MAP_STYLE.background;
 
@@ -35,6 +89,7 @@ export function initMap() {
 
   createLegend();
 }
+
 
 
 
@@ -96,6 +151,17 @@ export function refreshHoveredTooltip() {
 }
 
 
+function getTooltipDirection(map, latlng, padding = 80) {
+  const size = map.getSize();
+  const p = map.latLngToContainerPoint(latlng);
+
+  if (p.x < padding) return "right";
+  if (p.x > size.x - padding) return "left";
+  if (p.y < padding) return "bottom";
+  if (p.y > size.y - padding) return "top";
+
+  return "right";
+}
 
 export function updateMapShape() {
   const { map, CONFIG, isMunicipalityView } = state;
@@ -110,11 +176,9 @@ export function updateMapShape() {
     style: CONFIG.AREA_STYLE,
     onEachFeature: (feature, layer) => {
 
-      // Tooltip
       layer.bindTooltip(
         () => getAreaTooltipContent(feature),
         {
-          direction: "right",
           sticky: false,
           opacity: 0.95,
           offset: L.point(12, 0),
@@ -122,17 +186,19 @@ export function updateMapShape() {
         }
       );
 
-      // Disable tooltip when focused
       layer.on("tooltipopen", () => {
         if (state.selectedArea) layer.closeTooltip();
       });
 
-      // Hover highlight: dim all other areas
       layer.on("mouseover", () => {
         if (state.selectedArea) return;
 
         state.hoveredLayer = layer;
-        layer.openTooltip();
+
+        const centroid = layer.getBounds().getCenter();
+        const direction = getTooltipDirection(map, centroid);
+
+        layer.openTooltip(centroid, { direction });
 
         state.geoLayer.eachLayer(other => {
           if (other === layer) {
@@ -163,19 +229,20 @@ export function updateMapShape() {
         });
       });
 
-
-      // Click
       layer.on("click", (e) => {
         clearMapTooltips();
         e.originalEvent.stopPropagation();
         if (state.clickLocked) return;
         handleAreaClick(feature);
       });
+
     }
   });
 
   state.geoLayer.addTo(map);
 }
+
+
 
 
 

@@ -61,9 +61,8 @@
 #focused-area-panel .panel-card {
   pointer-events: none;
 
-  width: 90%;
-  max-width: 600px; 
-  min-height: 80%;
+  width: 80%;
+  height: 80%;
 
   background: rgba(255,255,255,0.95);
   border-radius: 20px;

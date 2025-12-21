@@ -434,6 +434,8 @@ export function generateFocusedAreaData(feature, container) {
 
 
 export function updateAreaCard() {
+    if (!state.selectedArea) return;
+
     const panel = document.getElementById("focused-area-panel");
     const wrapper = document.getElementById("focused-area-wrapper");
 
