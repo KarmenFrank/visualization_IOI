@@ -276,7 +276,7 @@ export function initGraph() {
         .attr("y", marginTitle.top)
         .attr("font-size", 16)
         .attr("font-weight", "700")
-        .text("Overnight stays");
+        .text("Seasonality of Overnight Stays");
 
     titleText = svg.append("text")
         .attr("class", "graph-subtitle")

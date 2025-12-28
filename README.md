@@ -57,6 +57,11 @@ Licensed under CC-BY 4.0: https://twemoji.twitter.com
 - <s>add **limited** panning and zooming on the map</s>
 - <s>if possible, make the timeline easier to click on
 - <s>show important events on global graph -> korona 1. val, 2. val etc., **poletne sezone**</s>
+- <s>Relative percentage preimenujemo v "% of All" </s>
+- <s>Ime grafa preimenujemo v "Seasonality of Overnight Stays"</s>
+- <s>Proper zoom initialization</s>
+- <s>Area Card fitting</s>
+
 
 **AESTHETHICS**
 - <s>Sprememba velikosti (širine) grafa do zapolnitve ekrana (zemljevid pa pustimo enako širok).</s>

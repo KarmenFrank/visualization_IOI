@@ -1,187 +1,229 @@
+/* =========================================================
+   PANEL / ANIMATION
+   ========================================================= */
+
+/* Animation wrapper (moves & scales) */
+.panel-card-anchor {
+  position: absolute;
+  transform-origin: 50% 50%;
+  pointer-events: auto;
+}
+
+/* Actual card (scrolling + layout) */
+.panel-card {
+  width: 100%;
+  height: 100%;
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+
+  overflow: hidden;
+}
+
+
+
+/* =========================================================
+   MUNICIPALITY PIE CHART
+   ========================================================= */
+
 /* Container */
 .municipality-chart-wrapper {
-    text-align: center;
-    margin: 0 auto;
+  text-align: center;
+  margin: 0 auto;
 }
 
 /* Main SVG */
 .municipality-chart-svg {
-    display: block;
-    margin: 10px auto;
+  display: block;
+  margin: 10px auto;
 }
 
 /* Group wrapper */
 .municipality-chart-group {
-    font-family: inherit;
+  font-family: inherit;
 }
 
 /* Pie slices */
 .municipality-chart-slice {
-    cursor: pointer;
-    transition: opacity 0.15s ease-in-out;
+  cursor: pointer;
+  transition: opacity 0.15s ease-in-out;
 }
 
-/* Restore hovered slice */
 .municipality-chart-slice:hover {
-    opacity: 1 !important;
+  opacity: 1 !important;
 }
 
-/* Dim ALL slices when hovering anywhere on the chart */
 .municipality-chart-group:hover .municipality-chart-slice {
-    opacity: 0.3;
+  opacity: 0.3;
 }
 
-/* Restore hovered slice emoji */
+/* Emoji behavior */
 .slice-group:hover image {
-    opacity: 1 !important;
+  opacity: 1 !important;
 }
 
-/* Dim ALL emojis when hovering chart */
 .municipality-chart-group:hover .slice-group image {
-    opacity: 0.3;
+  opacity: 0.3;
 }
 
-/* Emoji text inside slices */
+/* Emoji text */
 .municipality-chart-emoji {
-    pointer-events: none;
-    font-size: 20px;
-    font-family: Segoe UI Emoji, Apple Color Emoji, Noto Color Emoji, sans-serif;
+  pointer-events: none;
+  font-size: 20px;
+  font-family: Segoe UI Emoji, Apple Color Emoji, Noto Color Emoji, sans-serif;
 }
 
 /* Tooltip */
-.municipality-chart-tooltip {
-    position: absolute;
-    padding: 6px 10px;
-    background: rgba(0,0,0,0.75);
-    color: white;
-    font-size: 12px;
-    border-radius: 4px;
-    pointer-events: none;
-    opacity: 0;
-    z-index: 9999;
-    transition: opacity 0.1s ease-out;
-    font-family: Arial, Helvetica, sans-serif;
+.municipality-chart-tooltip,
+.pie-tooltip {
+  position: absolute;
+  padding: 6px 10px;
+  background: rgba(0,0,0,0.75);
+  color: white;
+  font-size: 12px;
+  border-radius: 4px;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 9999;
+  transition: opacity 0.1s ease-out;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Label under the chart */
+/* Label under chart */
 .municipality-chart-label {
-    font-size: 12px;
-    margin-top: 4px;
+  font-size: 12px;
+  margin-top: 4px;
 }
 
 /* No-data circle */
 .municipality-chart-nodata-circle {
-    fill: #ccc;
-    stroke: #999;
-}
-
-.pie-tooltip {
-    transition: opacity 0.1s ease;
-    z-index: 9999;
+  fill: #ccc;
+  stroke: #999;
 }
 
 
 
+/* =========================================================
+   MUNICIPALITY + STATREGION CARD (SHARED)
+   ========================================================= */
 
-
-
-
-
-
-
-
-
-/* Municipality Card Wrapper */
-.municipality-card {
-    width: 100%;
-    margin: 0 auto;
-    padding: 10px 0;
-}
-
-/* Title (municipality name) */
-.municipality-card-title {
-    font-size: 28px;
-    font-weight: bold;
-    text-align: center;
-    margin-bottom: 4px;
-}
-
-/* Main tourist count */
-.municipality-card-main-text {
-    text-align: center;
-    margin-top: 6px;
-    font-size: 20px;
-    font-weight: 600;
-}
-
-/* Secondary tourist count (smaller text) */
-.municipality-card-sub-text {
-    text-align: center;
-    font-size: 20px;
-    color: #666;
-    margin-bottom: 10px;
-}
-
-/* Pie chart container */
-.municipality-card-chart {
-    margin-top: 10px;
-}
-
-/* Table container */
-.municipality-card-table {
-    margin-top: 10px;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* Wrapper */
+.municipality-card,
 .statregion-card {
-    width: 100%;
-    margin: 0 auto;
-    padding: 10px 0;
+  width: 100%;
+  margin: 0 auto;
+  padding: 10px 0;
+
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
-/* Title */
+/* Titles */
+.municipality-card-title,
 .statregion-card-title {
-    font-size: 20px;
-    font-weight: bold;
-    text-align: center;
-    margin-bottom: 4px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 4px;
 }
 
-/* Main tourist line */
+.municipality-card-title {
+  font-size: 28px;
+}
+
+.statregion-card-title {
+  font-size: 20px;
+}
+
+/* Main text */
+.municipality-card-main-text,
 .statregion-card-main-text {
-    text-align: center;
-    margin-top: 6px;
-    font-size: 14px;
-    font-weight: 600;
+  text-align: center;
+  margin-top: 6px;
+  font-weight: 600;
 }
 
-/* Secondary filtered count */
+.municipality-card-main-text {
+  font-size: 20px;
+}
+
+.statregion-card-main-text {
+  font-size: 14px;
+}
+
+/* Sub text */
+.municipality-card-sub-text,
 .statregion-card-sub-text {
-    text-align: center;
-    font-size: 12px;
-    color: #666;
-    margin-bottom: 10px;
+  text-align: center;
+  color: #666;
+  margin-bottom: 10px;
 }
 
-/* Pie chart container */
+.municipality-card-sub-text {
+  font-size: 20px;
+}
+
+.statregion-card-sub-text {
+  font-size: 12px;
+}
+
+/* Chart container */
+.municipality-card-chart,
 .statregion-card-chart {
-    margin-top: 10px;
+  margin-top: 10px;
 }
 
 /* Table container */
+.municipality-card-table,
 .statregion-card-table {
-    margin-top: 10px;
+  margin-top: 10px;
+}
+
+
+
+/* =========================================================
+   MUNICIPALITY TABLE (SCROLLING)
+   ========================================================= */
+
+.municipality-card-table {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Scroll container */
+.municipality-table-wrapper {
+  margin-top: 18px;
+  width: 100%;
+  height: 300px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+/* Table */
+.municipality-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  table-layout: fixed;
+}
+
+/* Header */
+.municipality-table-header-row {
+  background: #f0f0f0;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.municipality-table-header {
+  padding: 8px 12px;
+  text-align: left;
+}
+
+/* Body cells */
+.municipality-table-cell {
+  padding: 8px 12px;
 }

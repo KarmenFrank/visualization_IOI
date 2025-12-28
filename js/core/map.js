@@ -8,18 +8,24 @@ import { getTouristsSums } from './data.js';
 
 export function initMap() {
   const { CONFIG } = state;
-
-  const MIN_ZOOM = 9;
-  const MAX_ZOOM = 11;
   const INITIAL_CENTER = CONFIG.INITIAL_VIEW.center;
+  const MAX_ZOOM = 11;
+
+  // Slovenia bounds (SW, NE)
+  const SLOVENIA_BOUNDS = L.latLngBounds(
+    [45.4210, 13.3665],
+    [46.8528, 16.4509]
+  );
+
+  let homeZoom = null;
+  let isZoomAnimating = false;
 
   state.map = L.map("map", {
     center: INITIAL_CENTER,
-    zoom: MIN_ZOOM,
-    minZoom: MIN_ZOOM,
-    maxZoom: MAX_ZOOM,
-
+    zoom: 8,
     zoomControl: false,
+    zoomSnap: 0,
+    zoomDelta: 0.25,
     dragging: true,
     scrollWheelZoom: false,
     doubleClickZoom: true,
@@ -28,7 +34,47 @@ export function initMap() {
     inertia: false
   });
 
-  // --- Custom zoom control ---
+  state.map.setMaxZoom(MAX_ZOOM);
+
+  // ---------- FIT + HOME FUNCTION ----------
+  const fitSlovenia = (initial = false, animated = false) => {
+    state.map.invalidateSize(true);
+
+    state.map.fitBounds(SLOVENIA_BOUNDS, {
+      paddingTopLeft: [50, 50],
+      paddingBottomRight: [50, 50],
+      animate: animated,
+      duration: animated ? 0.4 : 0
+    });
+
+    requestAnimationFrame(() => {
+      const z = state.map.getZoom();
+
+      if (initial && homeZoom === null) {
+        homeZoom = z;
+        state.map.setMinZoom(homeZoom);
+      }
+
+      state.map.setZoom(homeZoom ?? z);
+      state.map.dragging.disable();
+    });
+  };
+
+  // Initial fit (defines homeZoom)
+  state.map.whenReady(() => {
+    requestAnimationFrame(() => {
+      setTimeout(() => fitSlovenia(true, false), 0);
+    });
+  });
+
+  // Refit on resize (no animation)
+  window.addEventListener("resize", () => {
+    requestAnimationFrame(() => {
+      setTimeout(() => fitSlovenia(false, false), 0);
+    });
+  });
+
+  // ---------- CUSTOM ZOOM CONTROL ----------
   const ZoomHomeControl = L.Control.extend({
     options: { position: "topleft" },
     onAdd(map) {
@@ -44,20 +90,17 @@ export function initMap() {
 
       L.DomEvent.on(zin, "click", e => {
         L.DomEvent.preventDefault(e);
-        if (map.getZoom() < MAX_ZOOM) {
+        if (map.getZoom() < map.getMaxZoom()) {
           map.zoomIn(1);
         }
       });
 
       L.DomEvent.on(zout, "click", e => {
         L.DomEvent.preventDefault(e);
-        const z = map.getZoom();
 
-        if (z - 1 <= MIN_ZOOM) {
-          map.flyTo(INITIAL_CENTER, MIN_ZOOM, {
-            duration: 0.4,
-            easeLinearity: 0.25
-          });
+        if (map.getZoom() - 1 <= homeZoom) {
+          // Animated snap-back to home
+          fitSlovenia(false, true);
         } else {
           map.zoomOut(1);
         }
@@ -69,16 +112,36 @@ export function initMap() {
 
   state.map.addControl(new ZoomHomeControl());
 
+  // ---------- TOOLTIP SAFETY DURING ZOOM ----------
+  state.map.on("zoomstart", () => {
+    isZoomAnimating = true;
+
+    // Safely close all layer-bound tooltips
+    state.map.eachLayer(layer => {
+      if (layer && typeof layer.closeTooltip === "function") {
+        layer.closeTooltip();
+      }
+    });
+
+    // Disable tooltip interactions during animation
+    const pane = state.map.getPane("tooltipPane");
+    if (pane) pane.style.pointerEvents = "none";
+  });
+
   state.map.on("zoomend", () => {
-    if (state.map.getZoom() === MIN_ZOOM) {
+    isZoomAnimating = false;
+
+    const pane = state.map.getPane("tooltipPane");
+    if (pane) pane.style.pointerEvents = "auto";
+
+    if (state.map.getZoom() === homeZoom) {
       state.map.dragging.disable();
     } else {
       state.map.dragging.enable();
     }
   });
 
-  state.map.dragging.disable();
-
+  // ---------- MISC ----------
   L.DomUtil.get("map").style.background = CONFIG.MAP_STYLE.background;
 
   state.map.on("click", () => {
@@ -89,6 +152,11 @@ export function initMap() {
 
   createLegend();
 }
+
+
+
+
+
 
 
 

@@ -9,4 +9,12 @@
 
 html, body {
   font-family: Arial, Helvetica, sans-serif;
+  height: 100%;
+  margin: 0.5%;
+  margin-top: 0%;
+  overflow: hidden;
+}
+
+h2 {
+  margin-bottom: 0px;
 }

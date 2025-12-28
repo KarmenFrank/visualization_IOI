@@ -20,15 +20,16 @@ function getPieTooltip() {
 
 
 
-function makePieChart(display_data) {
+function makePieChart(display_data, container_size) {
 
     const EMOJI_SIZE = 22;
     const EMOJI_RADIUS = 0.85;
+    const PIE_CHAR_SIZE_PERCENT = 0.4;
 
     const total_sum = display_data.pie_chart_sum;
     const country_data = display_data.pie_chart_list;
 
-    const width = 350;
+    const width = container_size[0] * PIE_CHAR_SIZE_PERCENT;
     const height = width;
     const radius = Math.min(width, height) / 2;
 
@@ -172,8 +173,7 @@ function makePieChart(display_data) {
 
 
 
-function makeTouristTableMunicipality(display_data) {
-
+function makeTouristTable(display_data) {
     const table_data = display_data.table_list;
     const total_tourists = display_data.total_tourist_sum;
 
@@ -186,50 +186,32 @@ function makeTouristTableMunicipality(display_data) {
             : "0%";
 
         rows += `
-            <tr>
-                <td style="padding: 8px 12px;">${nationality}</td>
-                <td style="padding: 8px 12px;">${tourists}</td>
-                <td style="padding: 8px 12px;">${percent}</td>
+            <tr class="municipality-table-row">
+                <td class="municipality-table-cell">${nationality}</td>
+                <td class="municipality-table-cell">${tourists}</td>
+                <td class="municipality-table-cell">${percent}</td>
             </tr>
         `;
     }
 
-
     return `
-    <div style="
-        margin-top: 18px;
-        max-width: 100%;
-        overflow-x: auto;
-        padding-bottom: 6px;
-        max-height: 300px;
-        overflow-y: auto;
-    ">
-        <table style="
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-            min-width: 320px;
-        ">
-            <thead>
-                <tr style="
-                    background: #f0f0f0;
-                    position: sticky;
-                    top: 0;
-                    z-index: 1;
-                ">
-                    <th style="padding: 8px 12px; text-align: left;">Nationality</th>
-                    <th style="padding: 8px 12px; text-align: left;">Number of tourists</th>
-                    <th style="padding: 8px 12px; text-align: left;">Relative percentage</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                ${rows}
-            </tbody>
-        </table>
-    </div>
+        <div class="municipality-table-wrapper">
+            <table class="municipality-table">
+                <thead>
+                    <tr class="municipality-table-header-row">
+                        <th class="municipality-table-header">Nationality</th>
+                        <th class="municipality-table-header">Number of tourists</th>
+                        <th class="municipality-table-header">% of All</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rows}
+                </tbody>
+            </table>
+        </div>
     `;
 }
+
 
 export function cleanUpPieChartTooltips() {
     d3.selectAll(".municipality-chart-tooltip")
@@ -237,73 +219,7 @@ export function cleanUpPieChartTooltips() {
 }
 
 
-
-
-
-
-function makeTouristTableStatRegion(display_data) {
-
-    const table_data = display_data.table_list;
-    const total_tourists = display_data.total_tourist_sum;
-
-    let rows = "";
-    for (const item of table_data) {
-        const nationality = item.nationality;
-        const tourists = item.tourists;
-        const percent = total_tourists > 0
-            ? ((tourists / total_tourists) * 100).toFixed(2) + "%"
-            : "0%";
-
-        rows += `
-            <tr>
-                <td style="padding: 8px 12px;">${nationality}</td>
-                <td style="padding: 8px 12px;">${tourists}</td>
-                <td style="padding: 8px 12px;">${percent}</td>
-            </tr>
-        `;
-    }
-
-
-    return `
-    <div style="
-        margin-top: 18px;
-        max-width: 100%;
-        overflow-x: auto;
-        padding-bottom: 6px;
-        max-height: 300px;
-        overflow-y: auto;
-    ">
-        <table style="
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-            min-width: 320px;
-        ">
-            <thead>
-                <tr style="
-                    background: #f0f0f0;
-                    position: sticky;
-                    top: 0;
-                    z-index: 1;
-                ">
-                    <th style="padding: 8px 12px; text-align: left;">Nationality</th>
-                    <th style="padding: 8px 12px; text-align: left;">Number of tourists</th>
-                    <th style="padding: 8px 12px; text-align: left;">Relative percentage</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                ${rows}
-            </tbody>
-        </table>
-    </div>
-    `;
-
-}
-
-
-
-function makeMunicipalityCard(name) {
+function makeMunicipalityCard(name, container_size) {
 
     const display_data = getFilteredMunicipalityData(name);
     const month_string = formatMonthString(display_data.month_string);
@@ -342,14 +258,14 @@ function makeMunicipalityCard(name) {
     const chartWrapper = document.createElement("div");
     chartWrapper.className = "municipality-card-chart";
     chartWrapper.id = `municipality-card-chart-${name}`;
-    chartWrapper.appendChild(makePieChart(display_data));
+    chartWrapper.appendChild(makePieChart(display_data, container_size));
     wrapper.appendChild(chartWrapper);
 
     // Table
     const tableContainer = document.createElement("div");
     tableContainer.className = "municipality-card-table";
     tableContainer.id = `municipality-card-table-${name}`;
-    tableContainer.innerHTML = makeTouristTableMunicipality(display_data);
+    tableContainer.innerHTML = makeTouristTable(display_data);
     wrapper.appendChild(tableContainer);
 
     return wrapper;
@@ -357,7 +273,7 @@ function makeMunicipalityCard(name) {
 
 
 
-function makeStatRegionCard(name) {
+function makeStatRegionCard(name, container_size) {
 
     const display_data = getFilteredStatRegionData(name);
     const display_name = display_data.display_name;
@@ -396,14 +312,14 @@ function makeStatRegionCard(name) {
     const chartWrapper = document.createElement("div");
     chartWrapper.className = "statregion-card-chart";
     chartWrapper.id = `statregion-card-chart-${name}`;
-    chartWrapper.appendChild(makePieChart(display_data));
+    chartWrapper.appendChild(makePieChart(display_data, container_size));
     wrapper.appendChild(chartWrapper);
 
     // Table
     const tableContainer = document.createElement("div");
     tableContainer.className = "statregion-card-table";
     tableContainer.id = `statregion-card-table-${name}`;
-    tableContainer.innerHTML = makeTouristTableStatRegion(display_data);
+    tableContainer.innerHTML = makeTouristTable(display_data);
     wrapper.appendChild(tableContainer);
 
     return wrapper;
@@ -424,10 +340,12 @@ export function generateFocusedAreaData(feature, container) {
 
     container.innerHTML = "";
 
+    const container_size = [container.offsetWidth, container.offsetHeight];
+
     if (isMunicipality) {
-        container.appendChild(makeMunicipalityCard(name));
+        container.appendChild(makeMunicipalityCard(name, container_size));
     } else {
-        container.appendChild(makeStatRegionCard(name));
+        container.appendChild(makeStatRegionCard(name, container_size));
     }
 }
 
